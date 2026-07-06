@@ -1,6 +1,6 @@
 // BSGA Palmarès — Service Worker
 // Permet le fonctionnement hors-ligne en mettant en cache tous les fichiers de l'app.
-const CACHE_NAME = "bsga-palmares-v0.26";
+const CACHE_NAME = "bsga-palmares-v0.27";
 const FILES_TO_CACHE = [
   "./index.html",
   "./app.js",
@@ -8,15 +8,11 @@ const FILES_TO_CACHE = [
   "./cotation_defaults.js",
   "./manifest.json",
   "./icon-192.png",
-  "./icon-512.png",
-  "./lib/chart.umd.min.js",
-  "./lib/xlsx.full.min.js",
-  "./lib/jspdf.umd.min.js",
-  "./lib/jspdf.plugin.autotable.min.js"
+  "./icon-512.png"
 ];
 
-// Fichiers "figés" (librairies tierces) : jamais modifiés, donc cache-first est sûr et rapide.
-const VENDOR_PATTERNS = ["/lib/"];
+// Fichiers "figés" (librairies tierces via CDN) : jamais modifiés, donc cache-first est sûr et rapide.
+const VENDOR_PATTERNS = ["cdn.jsdelivr.net", "cdnjs.cloudflare.com"];
 
 // Installation : mise en cache de tous les fichiers
 self.addEventListener("install", event => {

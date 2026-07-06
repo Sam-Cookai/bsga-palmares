@@ -1,6 +1,6 @@
 # BSGA Palmarès
 
-**Version 0.26** — voir [CHANGELOG.md](./CHANGELOG.md) pour le détail des évolutions entre versions.
+**Version 0.27** — voir [CHANGELOG.md](./CHANGELOG.md) pour le détail des évolutions entre versions.
 
 Application autonome (HTML/JS) pour consulter, filtrer, visualiser, importer et
 exporter les résultats d'athlétisme du club BSGA (Bussy Saint-Georges Athlétisme), saison 2026 et suivantes.
@@ -21,8 +21,12 @@ dans le même dossier :
 index.html
 app.js
 data.js
-lib/   (dossier contenant les librairies graphiques et d'export)
 ```
+
+Les librairies graphiques et d'export (Chart.js, jsPDF, SheetJS, PDF.js) sont
+chargées automatiquement depuis un CDN — une connexion internet est donc
+nécessaire au premier chargement (et pour l'export PDF/Excel). Aucun dossier
+`lib/` n'est à gérer.
 
 Double-cliquez sur `index.html` pour ouvrir l'application dans votre navigateur
 (Chrome, Edge ou Firefox recommandés).

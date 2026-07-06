@@ -6,7 +6,7 @@
    en tout ou partie, sans autorisation écrite préalable est interdite.
    =========================================================== */
 
-const APP_VERSION = "0.26";
+const APP_VERSION = "0.27";
 
 const COTATION_STORAGE_PREFIX = "bsga_cotation_v1_";
 

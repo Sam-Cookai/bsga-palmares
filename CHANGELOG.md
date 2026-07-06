@@ -7,6 +7,23 @@ complète.
 
 ---
 
+## Version 0.27
+
+- **Cause racine trouvée pour les graphiques vides sur GitHub Pages** :
+  le dossier `lib/` (Chart.js, jsPDF, jsPDF-autotable, SheetJS, PDF.js)
+  n'avait en réalité jamais été déployé à la racine du dépôt — les
+  fichiers étaient restés enfouis dans d'anciens dossiers `BSGA_Palmares_v0.8(1)`
+  et `(2)` issus de précédents essais d'upload de zip.
+- **Passage à un chargement des librairies via CDN** (jsDelivr / cdnjs),
+  avec les mêmes versions exactes que celles utilisées jusqu'ici
+  (Chart.js 4.5.1, jsPDF 4.2.1, jsPDF-autotable 5.0.8, SheetJS 0.18.5,
+  PDF.js 6.1.200). Cela élimine définitivement le besoin d'uploader un
+  dossier `lib/` — particulièrement pénible depuis un téléphone — et le
+  dossier `lib/` local a été retiré du projet. Une connexion internet
+  est donc nécessaire au premier chargement de l'app et pour les
+  exports PDF/Excel.
+- Service worker et README mis à jour en conséquence.
+
 ## Version 0.26
 
 - **Correction d'un plantage silencieux au démarrage** : le numéro de
