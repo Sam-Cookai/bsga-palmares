@@ -7,6 +7,23 @@ complète.
 
 ---
 
+## Version 0.26
+
+- **Correction d'un plantage silencieux au démarrage** : le numéro de
+  version était affiché *après* le rendu du tableau de bord. Si ce
+  rendu échoue (ex. la librairie de graphiques `lib/chart.umd.min.js`
+  n'a pas été correctement déployée), tout le reste de l'initialisation
+  s'arrêtait net — y compris l'affichage de la version — sans aucun
+  message d'erreur visible. La version s'affiche désormais en tout
+  premier, et une erreur de rendu du tableau de bord est maintenant
+  interceptée (loggée dans la console) au lieu de bloquer le reste de
+  l'application.
+- ⚠️ Si les graphiques du tableau de bord restent vides malgré ça,
+  vérifie que le dossier `lib/` a bien été déployé sur GitHub avec tout
+  son contenu (`chart.umd.min.js`, `xlsx.full.min.js`,
+  `jspdf.umd.min.js`, `jspdf.plugin.autotable.min.js`, etc.) — c'est la
+  cause la plus probable.
+
 ## Version 0.25
 
 - **Correction du service worker (mode hors-ligne / PWA)** : le nom du

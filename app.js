@@ -6,7 +6,7 @@
    en tout ou partie, sans autorisation écrite préalable est interdite.
    =========================================================== */
 
-const APP_VERSION = "0.25";
+const APP_VERSION = "0.26";
 
 const COTATION_STORAGE_PREFIX = "bsga_cotation_v1_";
 
@@ -1817,12 +1817,20 @@ function init() {
   initDB();
   setupNav();
   updateSidebarCount();
-  renderDashboard();
+
+  // La version et le titre sont fixés en premier : même si le rendu du tableau
+  // de bord échoue plus bas (ex. librairie manquante), la version reste visible.
   const versionEl = document.getElementById("appVersion");
   if (versionEl) versionEl.textContent = APP_VERSION;
   const versionMobileEl = document.getElementById("appVersionMobile");
   if (versionMobileEl) versionMobileEl.textContent = APP_VERSION;
   document.title = `BSGA Palmarès (v${APP_VERSION})`;
+
+  try {
+    renderDashboard();
+  } catch (e) {
+    console.error("Erreur au rendu du tableau de bord :", e);
+  }
 
   // Enregistrement du Service Worker pour le mode PWA (hors-ligne)
   if ("serviceWorker" in navigator) {
