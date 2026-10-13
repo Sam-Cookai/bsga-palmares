@@ -6,7 +6,7 @@
    en tout ou partie, sans autorisation écrite préalable est interdite.
    =========================================================== */
 
-const APP_VERSION = "0.48";
+const APP_VERSION = "0.49";
 
 const COTATION_STORAGE_PREFIX = "bsga_cotation_v1_";
 
@@ -1432,6 +1432,7 @@ function saveBirthdateFor(nom, dateStr) {
   const all = loadBirthdates();
   if (dateStr) all[nom] = dateStr; else delete all[nom];
   try { localStorage.setItem(BIRTHDATES_KEY, JSON.stringify(all)); } catch(e) { console.error(e); }
+  if (typeof ghMarkPending === "function") ghMarkPending(0);
 }
 
 // Année de référence de la saison en cours : jusqu'au 31 août inclus on reste
@@ -2070,6 +2071,7 @@ document.getElementById("confirmImport").addEventListener("click", () => {
   });
   saveToStorage();
   setLastImport(toAdd.length, [...new Set(toAdd.map(r => r.annee))].sort());
+  ghMarkPending(toAdd.length);
   updateSidebarCount();
   toast(`${toAdd.length} nouveaux résultats ajoutés à la base`, "success");
   setStep(3);
@@ -2748,9 +2750,181 @@ document.getElementById("publishDataJsBtn").addEventListener("click", () => {
     info.style.display = "block";
     const bd = out.birthdates > 1 ? `${out.birthdates} dates de naissance` : `${out.birthdates} date de naissance`;
     info.textContent = `data.js généré : ${out.count} résultats et ${bd} (version ${out.version.replace("T", " à ")}). Déposez-le maintenant sur GitHub à la place de l'ancien.`;
+    info.style.background = "#E6F4EA"; info.style.color = "#1E6B34";
   }
   toast("Fichier data.js téléchargé", "success");
 });
+
+/* ===========================================================
+   PUBLICATION AUTOMATIQUE SUR GITHUB
+   Envoie data.js sur le dépôt via l'API GitHub (blob → arbre → commit → branche),
+   avec une clé d'accès « fine-grained » limitée au dépôt (Contents : lecture/écriture).
+   La clé est conservée uniquement dans le navigateur de l'appareil.
+   =========================================================== */
+const GH_CFG_KEY = "bsga_github_publication";
+const GH_PENDING_KEY = "bsga_modifs_non_publiees";
+const GH_LASTPUB_KEY = "bsga_derniere_publication";
+
+function ghLoadCfg() { try { return JSON.parse(localStorage.getItem(GH_CFG_KEY) || "null"); } catch (e) { return null; } }
+function ghSaveCfg(cfg) { try { cfg ? localStorage.setItem(GH_CFG_KEY, JSON.stringify(cfg)) : localStorage.removeItem(GH_CFG_KEY); } catch (e) {} }
+function ghMarkPending(n) {
+  try {
+    const cur = JSON.parse(localStorage.getItem(GH_PENDING_KEY) || "null") || { count: 0 };
+    localStorage.setItem(GH_PENDING_KEY, JSON.stringify({ count: cur.count + (n || 0), since: cur.since || new Date().toISOString() }));
+  } catch (e) {}
+  renderGhPublishUI();
+}
+function ghPending() { try { return JSON.parse(localStorage.getItem(GH_PENDING_KEY) || "null"); } catch (e) { return null; } }
+
+function ghToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+async function ghApi(cfg, method, path, body) {
+  const res = await fetch("https://api.github.com/repos/" + cfg.repo + path, {
+    method,
+    headers: { "Authorization": "Bearer " + cfg.token, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28",
+               ...(body ? { "Content-Type": "application/json" } : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const msg = (data && data.message) || res.statusText;
+    const hint = res.status === 401 ? "clé invalide ou expirée"
+      : res.status === 403 ? "la clé n'a pas le droit d'écrire (Contents : Read and write)"
+      : res.status === 404 ? "dépôt ou branche introuvable, ou clé sans accès à ce dépôt"
+      : res.status === 409 || res.status === 422 ? "conflit : réessayez dans un instant" : "";
+    const err = new Error(`${res.status} ${msg}${hint ? " — " + hint : ""}`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+async function ghTest(cfg) {
+  const repo = await ghApi(cfg, "GET", "");
+  if (repo.permissions && repo.permissions.push === false) throw new Error("la clé n'a pas le droit d'écrire sur ce dépôt");
+  await ghApi(cfg, "GET", "/git/ref/heads/" + encodeURIComponent(cfg.branch));
+  return repo;
+}
+async function ghPublishDataJs(cfg, onStep) {
+  const out = buildDataJsForPublication();
+  onStep && onStep("Préparation…");
+  const ref = await ghApi(cfg, "GET", "/git/ref/heads/" + encodeURIComponent(cfg.branch));
+  const parentSha = ref.object.sha;
+  const parent = await ghApi(cfg, "GET", "/git/commits/" + parentSha);
+  onStep && onStep(`Envoi de ${out.count} résultats…`);
+  const blob = await ghApi(cfg, "POST", "/git/blobs", { content: ghToBase64(out.content), encoding: "base64" });
+  const tree = await ghApi(cfg, "POST", "/git/trees", { base_tree: parent.tree.sha, tree: [{ path: "data.js", mode: "100644", type: "blob", sha: blob.sha }] });
+  const commit = await ghApi(cfg, "POST", "/git/commits", {
+    message: `Mise à jour de la base : ${out.count} résultats (BSGA Palmarès)`, tree: tree.sha, parents: [parentSha]
+  });
+  onStep && onStep("Validation…");
+  await ghApi(cfg, "PATCH", "/git/refs/heads/" + encodeURIComponent(cfg.branch), { sha: commit.sha });
+  // cet appareil a déjà toutes ces données : inutile de les re-fusionner au prochain chargement
+  try { localStorage.setItem(SEED_APPLIED_KEY, out.version); } catch (e) {}
+  try { localStorage.setItem(GH_LASTPUB_KEY, JSON.stringify({ date: new Date().toISOString(), count: out.count, commit: commit.sha })); } catch (e) {}
+  try { localStorage.removeItem(GH_PENDING_KEY); } catch (e) {}
+  return { out, commit };
+}
+
+function ghPublishNow(btn) {
+  const cfg = ghLoadCfg();
+  if (!cfg) { showGhSettings(); return; }
+  const info = document.getElementById("publishInfo");
+  const say = (t, ok) => {
+    if (info) { info.style.display = "block"; info.textContent = t;
+      info.style.background = ok === false ? "#FCE6DE" : ok ? "#E6F4EA" : "#EEF3F5"; info.style.color = ok === false ? "#9A2A0E" : ok ? "#1E6B34" : "var(--grey)"; }
+  };
+  const btns = [btn, document.getElementById("ghPublishBtn")].filter(Boolean);
+  btns.forEach(b => { b.disabled = true; });
+  ghPublishDataJs(cfg, t => say("Publication : " + t))
+    .then(({ out }) => {
+      say(`Publié sur GitHub : ${out.count} résultats. Le site en ligne sera à jour d'ici 1 à 2 minutes.`, true);
+      toast("Base publiée sur GitHub", "success");
+    })
+    .catch(e => { say("Échec de la publication : " + e.message, false); toast("Échec de la publication sur GitHub", "error"); })
+    .finally(() => { btns.forEach(b => { b.disabled = false; }); renderGhPublishUI(); });
+}
+
+function showGhSettings() {
+  document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll('[data-page="settings"]').forEach(b => b.classList.add("active"));
+  document.getElementById("page-settings").classList.add("active");
+  renderSettings();
+  const p = document.getElementById("publishPanel");
+  if (p) p.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderGhPublishUI(editing) {
+  const cfg = ghLoadCfg();
+  const pend = ghPending();
+  let last = null; try { last = JSON.parse(localStorage.getItem(GH_LASTPUB_KEY) || "null"); } catch (e) {}
+  const setup = document.getElementById("ghSetup"), conf = document.getElementById("ghConfigured");
+  if (setup && conf) {
+    const showSetup = !cfg || editing === true;
+    setup.style.display = showSetup ? "block" : "none";
+    conf.style.display = showSetup ? "none" : "block";
+    document.getElementById("ghCancelBtn").style.display = cfg && showSetup ? "" : "none";
+    document.getElementById("ghForgetBtn").style.display = cfg && showSetup ? "" : "none";
+    if (cfg && showSetup) {
+      document.getElementById("ghRepo").value = cfg.repo; document.getElementById("ghBranch").value = cfg.branch;
+      document.getElementById("ghToken").value = ""; document.getElementById("ghToken").placeholder = "clé enregistrée (laisser vide pour la garder)";
+    }
+    if (cfg) {
+      const line = document.getElementById("ghStatusLine");
+      line.innerHTML = "";
+      line.appendChild(el("div", {}, ["Connecté au dépôt ", el("b", {}, cfg.repo), ` (branche ${cfg.branch}).`]));
+      line.appendChild(el("div", {}, last ? ["Dernière publication : ", el("b", {}, new Date(last.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })), ` (${last.count} résultats).`] : "Aucune publication depuis cet appareil."));
+    }
+  }
+  // bandeaux « modifications non publiées »
+  ["ghPendingBanner", "ghPendingImport"].forEach(id => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    b.innerHTML = "";
+    if (!pend) { b.style.display = "none"; return; }
+    b.style.display = "flex";
+    b.appendChild(el("span", {}, `⚠️ Modifications non publiées sur cet appareil${pend.count ? ` (${pend.count} résultat${pend.count > 1 ? "s" : ""} ajouté${pend.count > 1 ? "s" : ""})` : ""} : les autres appareils ne les voient pas encore.`));
+    const btn = el("button", { class: "btn primary small" }, cfg ? "Publier sur GitHub" : "Configurer la publication");
+    btn.addEventListener("click", () => cfg ? ghPublishNow(btn) : showGhSettings());
+    b.appendChild(btn);
+  });
+}
+
+(function setupGhPublish() {
+  const save = document.getElementById("ghSaveBtn");
+  if (!save) return;
+  save.addEventListener("click", () => {
+    const old = ghLoadCfg();
+    const cfg = {
+      repo: document.getElementById("ghRepo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, ""),
+      branch: document.getElementById("ghBranch").value.trim() || "main",
+      token: document.getElementById("ghToken").value.trim() || (old && old.token) || ""
+    };
+    const info = document.getElementById("publishInfo");
+    const say = (t, ok) => { info.style.display = "block"; info.textContent = t;
+      info.style.background = ok === false ? "#FCE6DE" : ok ? "#E6F4EA" : "#EEF3F5"; info.style.color = ok === false ? "#9A2A0E" : ok ? "#1E6B34" : "var(--grey)"; };
+    if (!/^[\w.-]+\/[\w.-]+$/.test(cfg.repo)) { say("Dépôt invalide : écrivez « compte/dépôt », ex. Sam-Cookai/bsga-palmares.", false); return; }
+    if (!cfg.token) { say("Collez la clé d'accès GitHub.", false); return; }
+    save.disabled = true; say("Test de la connexion…");
+    ghTest(cfg).then(() => {
+      ghSaveCfg(cfg); say("Connexion réussie : vous pouvez publier.", true); renderGhPublishUI();
+    }).catch(e => say("Connexion impossible : " + e.message, false)).finally(() => { save.disabled = false; });
+  });
+  document.getElementById("ghPublishBtn").addEventListener("click", (e) => ghPublishNow(e.currentTarget));
+  document.getElementById("ghEditBtn").addEventListener("click", () => renderGhPublishUI(true));
+  document.getElementById("ghCancelBtn").addEventListener("click", () => renderGhPublishUI());
+  document.getElementById("ghForgetBtn").addEventListener("click", () => {
+    confirmAction("Oublier la clé GitHub ?", "La connexion à GitHub sera supprimée de cet appareil. Pensez aussi à révoquer la clé sur github.com si vous ne l'utilisez plus.", () => {
+      ghSaveCfg(null); renderGhPublishUI(); toast("Clé GitHub supprimée de cet appareil", "success");
+    });
+  });
+  renderGhPublishUI();
+})();
 
 document.getElementById("loadJsonBtn").addEventListener("click", () => {
   document.getElementById("loadJsonInput").click();

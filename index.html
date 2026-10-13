@@ -368,6 +368,18 @@ a{color:var(--amber);}
 }
 .btn.primary:hover{background:#C9350F; border-color:#C9350F;}
 .ffa-steps{display:grid; gap:14px;}
+.gh-pending{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;border-radius:8px;background:#FFF4E0;color:#7A4F00;font-size:12.5px;}
+.gh-pending .btn{padding:5px 12px;font-size:12px;}
+.gh-status{font-size:12.5px;color:var(--grey);line-height:1.6;}
+.gh-status b{color:var(--ink);}
+.gh-help{font-size:12.5px;color:var(--grey);line-height:1.6;}
+.gh-help summary{cursor:pointer;font-weight:600;color:var(--navy);}
+.gh-help ol{margin:6px 0;padding-left:20px;}
+.gh-warn{margin:4px 0 0;color:#7A4F00;}
+.gh-form{display:grid;grid-template-columns:1.4fr .6fr 2fr;gap:10px;margin-top:10px;}
+.gh-form label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;}
+.gh-form input{border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;font-size:13px;color:var(--ink);background:#fff;text-transform:none;letter-spacing:0;font-weight:400;}
+@media (max-width:760px){ .gh-form{grid-template-columns:1fr;} }
 .ffa-last-import{margin:-4px 0 14px;padding:8px 12px;border-radius:8px;background:#EEF3F5;font-size:12.5px;color:var(--grey);line-height:1.5;}
 .ffa-last-import b{color:var(--ink);}
 /* ---- Page Tables de cotation ---- */
@@ -1195,6 +1207,7 @@ select, input{ color-scheme: light; }
       <div class="panel" id="ffaAutoPanel">
         <div class="panel-title">Récupération automatique depuis athle.fr</div>
         <div id="importLastImport" class="ffa-last-import">Dernier import : —</div>
+        <div id="ghPendingImport" class="gh-pending" style="display:none;"></div>
         <div class="ffa-steps">
           <div class="ffa-step">
             <div class="ffa-num">1</div>
@@ -1284,16 +1297,47 @@ select, input{ color-scheme: light; }
 
       <div class="panel" id="publishPanel">
         <div class="panel-title">Publier la base en ligne (GitHub)</div>
+        <div id="ghPendingBanner" class="gh-pending" style="display:none;"></div>
         <p style="color:var(--grey); font-size:13px; line-height:1.6; margin:0 0 10px;">
-          Pour que tous les appareils (ordinateurs, téléphones) voient la même base :
+          Après un import, un clic sur <b>Publier sur GitHub</b> met en ligne la base de cet appareil
+          (résultats et dates de naissance). Une à deux minutes plus tard, chaque appareil qui ouvre
+          l'application en ligne reçoit automatiquement les nouveaux résultats (rien n'est supprimé).
         </p>
-        <ol style="color:var(--grey); font-size:13px; line-height:1.7; margin:0 0 12px; padding-left:20px;">
-          <li>Cliquez sur le bouton ci-dessous : il génère le fichier <code>data.js</code> avec tous les résultats et les dates de naissance de cet appareil.</li>
-          <li>Sur <b>github.com/Sam-Cookai/bsga-palmares</b> : <b>Add file → Upload files</b>, déposez <code>data.js</code>, puis <b>Commit changes</b> (il remplace l'ancien).</li>
-          <li>Après 1 à 2 minutes, chaque appareil qui ouvre l'application en ligne ajoute automatiquement les résultats qui lui manquent (rien n'est supprimé).</li>
-        </ol>
-        <button class="btn primary" id="publishDataJsBtn">Générer data.js pour GitHub</button>
+        <div id="ghConfigured" style="display:none;">
+          <div class="gh-status" id="ghStatusLine"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn primary" id="ghPublishBtn">Publier sur GitHub</button>
+            <button class="btn small" id="ghEditBtn">Modifier la connexion</button>
+          </div>
+        </div>
+        <div id="ghSetup" style="display:none;">
+          <details class="gh-help" open>
+            <summary>Connexion à GitHub (une seule fois, sur votre appareil principal)</summary>
+            <ol>
+              <li>Sur github.com : photo de profil → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
+              <li>Nom : « BSGA Palmarès » · Expiration : 1 an · <b>Repository access</b> : <i>Only select repositories</i> → <b>bsga-palmares</b>.</li>
+              <li><b>Permissions</b> → <i>Repository permissions</i> → <b>Contents</b> : <b>Read and write</b>. Rien d'autre.</li>
+              <li><b>Generate token</b>, copiez la clé (elle commence par <code>github_pat_</code>) et collez-la ci-dessous.</li>
+            </ol>
+            <p class="gh-warn">La clé reste uniquement dans ce navigateur. Ne la configurez pas sur un appareil partagé, et ne la communiquez à personne.</p>
+          </details>
+          <div class="gh-form">
+            <label>Dépôt <input type="text" id="ghRepo" value="Sam-Cookai/bsga-palmares" autocomplete="off"></label>
+            <label>Branche <input type="text" id="ghBranch" value="main" autocomplete="off"></label>
+            <label class="gh-token">Clé d'accès <input type="password" id="ghToken" placeholder="github_pat_…" autocomplete="off"></label>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn primary" id="ghSaveBtn">Enregistrer et tester</button>
+            <button class="btn small" id="ghCancelBtn" style="display:none;">Annuler</button>
+            <button class="btn small danger" id="ghForgetBtn" style="display:none;">Oublier la clé</button>
+          </div>
+        </div>
         <div id="publishInfo" class="ffa-status" style="display:none;"></div>
+        <details class="gh-help" style="margin-top:12px;">
+          <summary>Sans connexion GitHub : publication manuelle</summary>
+          <p style="margin:6px 0;">Générez le fichier puis, sur github.com, <b>Add file → Upload files</b>, déposez <code>data.js</code> et <b>Commit changes</b>.</p>
+          <button class="btn small" id="publishDataJsBtn">Générer data.js</button>
+        </details>
       </div>
 
       <div class="two-col">

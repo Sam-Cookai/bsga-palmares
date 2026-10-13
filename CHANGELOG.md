@@ -7,6 +7,22 @@ complète.
 
 ---
 
+## Version 0.49
+
+- **Publication en un clic sur GitHub** (page Base de données) : après
+  un import, « Publier sur GitHub » envoie directement le nouveau
+  `data.js` sur le dépôt (API GitHub : blob → arbre → commit → branche),
+  sans passer par github.com. Le site en ligne est à jour 1 à 2 minutes
+  plus tard sur tous les appareils.
+- Connexion à configurer une seule fois sur l'appareil principal, avec
+  une clé d'accès « fine-grained » limitée au dépôt (Contents : Read and
+  write), testée à l'enregistrement. La clé reste uniquement dans le
+  navigateur de l'appareil (jamais dans les fichiers publiés) ; bouton
+  « Oublier la clé ».
+- Bandeau « Modifications non publiées » sur les pages Importer et Base
+  de données après chaque import validé, avec un bouton de publication.
+- La publication manuelle (télécharger data.js) reste disponible.
+
 ## Version 0.48
 
 - Page « Importer des résultats » : la date du dernier import (avec le
