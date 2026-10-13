@@ -6,7 +6,7 @@
    en tout ou partie, sans autorisation écrite préalable est interdite.
    =========================================================== */
 
-const APP_VERSION = "0.27";
+const APP_VERSION = "0.48";
 
 const COTATION_STORAGE_PREFIX = "bsga_cotation_v1_";
 
@@ -55,6 +55,53 @@ const COTATION_COLS = [
   { key: "4x60m",        label: "4x60m",        fmt: "SSCC",  sens: "vitesse"   },
   { key: "4x60mMixte",   label: "4x60m Mixte",  fmt: "SSCC",  sens: "vitesse"   },
 ];
+
+// ── Épreuves du barème World Athletics (cadets → masters, engins seniors) ──
+// wa = nom de l'épreuve dans WA_COEFFS ; m / f = libellé selon le sexe (engins, hauteurs de haies).
+const WA_EVENTS = [
+  { key: "wa_50m",   wa: "50m",   fmt: "SSCC", m: "50m", f: "50m" },
+  { key: "wa_60m",   wa: "60m",   fmt: "SSCC", m: "60m", f: "60m" },
+  { key: "wa_100m",  wa: "100m",  fmt: "SSCC", m: "100m", f: "100m" },
+  { key: "wa_200m",  wa: "200m",  fmt: "SSCC", m: "200m", f: "200m" },
+  { key: "wa_200msh",wa: "200m sh", fmt: "SSCC", m: "200m salle", f: "200m salle" },
+  { key: "wa_300m",  wa: "300m",  fmt: "SSCC", m: "300m", f: "300m" },
+  { key: "wa_400m",  wa: "400m",  fmt: "SSCC", m: "400m", f: "400m" },
+  { key: "wa_400msh",wa: "400m sh", fmt: "SSCC", m: "400m salle", f: "400m salle" },
+  { key: "wa_50mH",  wa: "50mH",  fmt: "SSCC", m: "50m haies (106)", f: "50m haies (84)" },
+  { key: "wa_60mH",  wa: "60mH",  fmt: "SSCC", m: "60m haies (106)", f: "60m haies (84)" },
+  { key: "wa_100mH", wa: "100mH", fmt: "SSCC", m: null, f: "100m haies (84)" },
+  { key: "wa_110mH", wa: "110mH", fmt: "SSCC", m: "110m haies (106)", f: null },
+  { key: "wa_400mH", wa: "400mH", fmt: "SSCC", m: "400m haies (91)", f: "400m haies (76)" },
+  { key: "wa_800m",  wa: "800m",  fmt: "MMSSCC", m: "800m", f: "800m" },
+  { key: "wa_800msh",wa: "800m sh", fmt: "MMSSCC", m: "800m salle", f: "800m salle" },
+  { key: "wa_1000m", wa: "1000m", fmt: "MMSSCC", m: "1000m", f: "1000m" },
+  { key: "wa_1500m", wa: "1500m", fmt: "MMSSCC", m: "1500m", f: "1500m" },
+  { key: "wa_1500msh",wa: "1500m sh", fmt: "MMSSCC", m: "1500m salle", f: "1500m salle" },
+  { key: "wa_mile",  wa: "Mile",  fmt: "MMSSCC", m: "Mile", f: "Mile" },
+  { key: "wa_3000m", wa: "3000m", fmt: "MMSSCC", m: "3000m", f: "3000m" },
+  { key: "wa_3000msh",wa: "3000m sh", fmt: "MMSSCC", m: "3000m salle", f: "3000m salle" },
+  { key: "wa_5000m", wa: "5000m", fmt: "MMSSCC", m: "5000m", f: "5000m" },
+  { key: "wa_10000m",wa: "10000m",fmt: "MMSSCC", m: "10 000m", f: "10 000m" },
+  { key: "wa_2000sc",wa: "2000m SC", fmt: "MMSSCC", m: "2000m steeple (91)", f: "2000m steeple (76)" },
+  { key: "wa_3000sc",wa: "3000m SC", fmt: "MMSSCC", m: "3000m steeple (91)", f: "3000m steeple (76)" },
+  { key: "wa_r5k",   wa: "Road 5 km", fmt: "HMMSS", m: "5 km route", f: "5 km route" },
+  { key: "wa_r10k",  wa: "Road 10 km", fmt: "HMMSS", m: "10 km route", f: "10 km route" },
+  { key: "wa_rhm",   wa: "Road HM", fmt: "HMMSS", m: "Semi-marathon", f: "Semi-marathon" },
+  { key: "wa_rmar",  wa: "Road Marathon", fmt: "HMMSS", m: "Marathon", f: "Marathon" },
+  { key: "wa_3000w", wa: "3000mW", fmt: "MMSSCC", m: "3000m marche", f: "3000m marche" },
+  { key: "wa_5000w", wa: "5000mW", fmt: "MMSSCC", m: "5000m marche", f: "5000m marche" },
+  { key: "wa_r10kw", wa: "Road 10kmW", fmt: "HMMSS", m: "10 km marche", f: "10 km marche" },
+  { key: "wa_r20kw", wa: "Road 20kmW", fmt: "HMMSS", m: "20 km marche", f: "20 km marche" },
+  { key: "wa_HJ",    wa: "HJ", fmt: "CM", m: "Hauteur", f: "Hauteur" },
+  { key: "wa_PV",    wa: "PV", fmt: "CM", m: "Perche", f: "Perche" },
+  { key: "wa_LJ",    wa: "LJ", fmt: "CM", m: "Longueur", f: "Longueur" },
+  { key: "wa_TJ",    wa: "TJ", fmt: "CM", m: "Triple saut", f: "Triple saut" },
+  { key: "wa_SP",    wa: "SP", fmt: "CM", m: "Poids 7.26kg", f: "Poids 4kg" },
+  { key: "wa_DT",    wa: "DT", fmt: "CM", m: "Disque 2kg", f: "Disque 1kg" },
+  { key: "wa_HT",    wa: "HT", fmt: "CM", m: "Marteau 7.26kg", f: "Marteau 4kg" },
+  { key: "wa_JT",    wa: "JT", fmt: "CM", m: "Javelot 800g", f: "Javelot 600g" },
+];
+WA_EVENTS.forEach(e => COTATION_COLS.push({ key: e.key, label: e.m || e.f, fmt: e.fmt, sens: e.fmt === "CM" ? "distance" : "vitesse", wa: e.wa }));
 
 // Mapping épreuve du club → colonne de cotation
 const COTATION_EPREUVE_MAP = {
@@ -106,29 +153,123 @@ const COTATION_EPREUVE_MAP = {
   "4 X 60m":                     "4x60m",
 };
 
+// Les noms d'épreuves d'athle.fr varient (« 50m - salle », « 50m haies (65)-salle »,
+// « 1 000m piste courte », « Longueur | Vent : VR »…) : on compare sur un nom normalisé.
+function normEpForCotation(e) {
+  return String(e || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s*\|\s*vent\s*:.*$/, "")
+    .replace(/\s*-\s*salle\s*$/, "")
+    .replace(/\s+piste courte\s*$/, "")
+    .replace(/\s+/g, " ").trim();
+}
+const COTATION_EPREUVE_MAP_NORM = {};
+Object.keys(COTATION_EPREUVE_MAP).forEach(k => { COTATION_EPREUVE_MAP_NORM[normEpForCotation(k)] = COTATION_EPREUVE_MAP[k]; });
+function cotationColFor(epreuve) {
+  return COTATION_EPREUVE_MAP[epreuve] || COTATION_EPREUVE_MAP_NORM[normEpForCotation(epreuve)] || null;
+}
+
 const STORAGE_KEY = "club077108_resultats_v1";
 
 let DB = [];          // tableau de records {id, annee, sexe, club, groupe, epreuve, place, performance, nom}
 let NEXT_ID = 1;
 let pendingImport = []; // résultats analysés en attente de validation (page import)
 
+/* ---------------- Catégories d'âge FFA ----------------
+   Barème officiel (athle.fr, « Les catégories d'âge en 2027 ») : âge atteint dans
+   l'année de fin de saison. Masters subdivisés par tranches de 5 ans :
+   M0 35-39 ans, M1 40-44 … M9 80-84, M10 85 ans et plus. */
+function catFamily(label) {
+  const s = String(label || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (/baby/.test(s)) return "Baby Athlé";
+  if (/eveil|ecole/.test(s)) return "Éveil Athlétique";
+  if (/poussin/.test(s)) return "Poussins";
+  if (/benjamin/.test(s)) return "Benjamins";
+  if (/minime/.test(s)) return "Minimes";
+  if (/cadet/.test(s)) return "Cadets";
+  if (/junior/.test(s)) return "Juniors";
+  if (/espoir/.test(s)) return "Espoirs";
+  if (/senior/.test(s)) return "Seniors";
+  if (/master|veteran/.test(s)) return "Masters";
+  return "Non déterminée";
+}
+const CAT_FAMILY_ORDER = ["Baby Athlé", "Éveil Athlétique", "Poussins", "Benjamins", "Minimes", "Cadets", "Juniors", "Espoirs", "Seniors", "Masters", "Non déterminée"];
+function masterSubCode(age) {
+  if (!(age >= 35)) return null;
+  return "M" + Math.min(10, Math.floor((age - 35) / 5));
+}
+function masterSubRange(code) {
+  const k = parseInt(String(code).replace(/\D/g, ""), 10);
+  if (isNaN(k)) return "";
+  return k >= 10 ? "85 ans et plus" : `${35 + 5 * k}-${39 + 5 * k} ans`;
+}
+// Catégorie affichée d'un résultat (au moment du résultat) : « Master M2 » quand
+// l'année de naissance est connue, libellés alignés sur la FFA.
+function catLabel(r) {
+  const base = (r && r.categorie) || "Non déterminée";
+  const fam = catFamily(base);
+  if (fam === "Masters") {
+    const age = (parseInt(r.annee, 10) || 0) - (parseInt(r.anneeNaissance, 10) || 0);
+    const sub = r.anneeNaissance ? masterSubCode(age) : null;
+    return sub ? "Master " + sub : "Master";
+  }
+  if (fam === "Éveil Athlétique") return "Éveil Athlétique";
+  return base;
+}
+function catSortKey(label) {
+  const fam = catFamily(label);
+  let k = CAT_FAMILY_ORDER.indexOf(fam) * 100;
+  const m = String(label).match(/\bM(\d+)\b/);
+  if (fam === "Masters") k += m ? 1 + parseInt(m[1], 10) : 0;
+  if (/(ine|ette)$/i.test(String(label))) k += 0.5;
+  return k;
+}
+function sortCategories(list) { return [...list].sort((a, b) => catSortKey(a) - catSortKey(b) || String(a).localeCompare(String(b), "fr")); }
+const ALL_MASTERS_OPTION = "Masters (toutes tranches)";
+
 /* ---------------- Stockage local (localStorage) ---------------- */
+// Stockage compact : on n'écrit pas les champs qui se recalculent (club du BSGA,
+// discipline déduite de l'épreuve) pour rester sous la limite de stockage des
+// navigateurs (~5 Mo) avec plus de 10 000 résultats.
 function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length) return parsed;
+      if (Array.isArray(parsed) && parsed.length) {
+        return parsed.map(r => {
+          if (!r.club) r.club = "077108";
+          if (!r.groupe) r.groupe = guessGroupe(r.epreuve || "");
+          return r;
+        });
+      }
     }
   } catch (e) { console.warn("Lecture storage impossible", e); }
   return null;
 }
 
+let STORAGE_FAILED = false;
 function saveToStorage() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+    const compact = DB.map(r => {
+      const o = {};
+      Object.keys(r).forEach(k => {
+        if (k.startsWith("_") || r[k] === undefined || r[k] === "") return;
+        if (k === "club" && r.club === "077108") return;
+        if (k === "groupe" && r.groupe === guessGroupe(r.epreuve || "")) return;
+        o[k] = r[k];
+      });
+      return o;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(compact));
+    STORAGE_FAILED = false;
+    return true;
   } catch (e) {
     console.warn("Sauvegarde storage impossible", e);
+    if (!STORAGE_FAILED && typeof toast === "function") {
+      setTimeout(() => toast("Attention : l'espace de stockage du navigateur est plein, les derniers ajouts ne seront pas conservés après fermeture. Exportez la base (page Base de données).", "error"), 500);
+    }
+    STORAGE_FAILED = true;
+    return false;
   }
 }
 
@@ -137,15 +278,146 @@ function ensureCategorie(r) {
   return r;
 }
 
+/* ---------------- Base publiée en ligne (data.js) ----------------
+   data.js contient la base "officielle" publiée sur GitHub, avec un numéro de
+   version (SEED_VERSION). Au démarrage, si cette version n'a pas encore été
+   intégrée sur cet appareil, on AJOUTE les résultats qui manquent (rien n'est
+   supprimé ni écrasé) et on complète les dates de naissance inconnues. */
+const SEED_APPLIED_KEY = "bsga_seed_version_appliquee";
+let SEED_MERGE_REPORT = null;
+
+function getSeedVersion() { return typeof SEED_VERSION !== "undefined" ? String(SEED_VERSION) : ""; }
+function getSeedBirthdates() { return typeof SEED_BIRTHDATES !== "undefined" && SEED_BIRTHDATES ? SEED_BIRTHDATES : {}; }
+
+function mergeSeedBirthdates() {
+  const seedB = getSeedBirthdates();
+  const local = loadBirthdates();
+  let added = 0;
+  Object.keys(seedB).forEach(nom => { if (!local[nom] && seedB[nom]) { local[nom] = seedB[nom]; added++; } });
+  if (added) { try { localStorage.setItem(BIRTHDATES_KEY, JSON.stringify(local)); } catch (e) { console.error(e); } }
+  return added;
+}
+
+/* ---------- Fusion d'une liste de résultats dans la base ----------
+   - même résultat (année, sexe, épreuve, athlète, performance) : on le complète
+     avec les informations de la source (place, chrono, date, lieu, catégorie FFA) ;
+   - même performance mais épreuve renommée par athle.fr (ex. "50m" → "50m - salle",
+     "200m" → "200m piste courte") : on adopte le nouveau nom au lieu de créer un doublon ;
+   - sinon : nouveau résultat ajouté. Rien n'est jamais supprimé. */
+function looseKey(r) {
+  return [normStr(r.annee), normStr(r.sexe), normStr(r.nom), normPerf(r.performance)].join("|");
+}
+function isRenamedEpreuve(oldEp, newEp) {
+  const a = normEpreuve(oldEp), b = normEpreuve(newEp);
+  if (!a || !b || a === b || !b.startsWith(a)) return false;
+  return /^\s*-?\s*(SALLE|PISTE COURTE)\b/.test(b.slice(a.length));
+}
+function refreshRecordFrom(t, n) {
+  if (n.place !== undefined && n.place !== "") t.place = String(n.place);
+  ["chrono", "date", "lieu", "anneeNaissance"].forEach(f => { if (n[f]) t[f] = n[f]; });
+  if (n.categorie && n.categorie !== "Non déterminée") t.categorie = n.categorie;
+}
+// Supprime les doublons stricts (même année, sexe, épreuve, athlète et performance),
+// en gardant l'exemplaire le plus complet (avec date/lieu/chrono). Modifie le tableau.
+function removeExactDuplicates(arr) {
+  const score = r => (r.date ? 2 : 0) + (r.lieu ? 1 : 0) + (r.chrono ? 1 : 0);
+  const best = new Map();
+  arr.forEach((r, i) => {
+    const k = recordKey(r);
+    const cur = best.get(k);
+    if (cur === undefined || score(r) > score(arr[cur])) best.set(k, i);
+  });
+  const keep = new Set(best.values());
+  const before = arr.length;
+  const kept = arr.filter((r, i) => keep.has(i));
+  arr.length = 0;
+  kept.forEach(r => arr.push(r));
+  return before - arr.length;
+}
+
+function mergeRecordsInto(target, incoming) {
+  const inByKey = new Map();
+  incoming.forEach(r => { const k = recordKey(r); if (!inByKey.has(k)) inByKey.set(k, r); });
+  const loose = new Map();
+  inByKey.forEach((r, k) => { const lk = looseKey(r); if (!loose.has(lk)) loose.set(lk, []); loose.get(lk).push({ r, k }); });
+  const used = new Set();
+  const stats = { refreshed: 0, renamed: 0, added: 0 };
+  target.forEach(t => {
+    const k = recordKey(t);
+    const n = inByKey.get(k);
+    if (n && !used.has(k)) { used.add(k); refreshRecordFrom(t, n); stats.refreshed++; return; }
+    const m = (loose.get(looseKey(t)) || []).find(c => !used.has(c.k) && isRenamedEpreuve(t.epreuve, c.r.epreuve));
+    if (m) {
+      used.add(m.k);
+      t.epreuve = m.r.epreuve;
+      if (m.r.groupe) t.groupe = m.r.groupe;
+      refreshRecordFrom(t, m.r);
+      stats.renamed++;
+    }
+  });
+  inByKey.forEach((n, k) => {
+    if (used.has(k)) return;
+    target.push(ensureCategorie({ ...n, id: NEXT_ID++ }));
+    stats.added++;
+  });
+  return stats;
+}
+
 function initDB() {
   const stored = loadFromStorage();
+  const seedVersion = getSeedVersion();
+  let applied = "";
+  try { applied = localStorage.getItem(SEED_APPLIED_KEY) || ""; } catch (e) {}
+
   if (stored) {
     DB = stored.map(ensureCategorie);
+    NEXT_ID = DB.reduce((m, r) => Math.max(m, r.id || 0), 0) + 1;
+    if (seedVersion && seedVersion !== applied) {
+      const st = mergeRecordsInto(DB, SEED_DATA);
+      removeExactDuplicates(DB);
+      const added = st.added;
+      const bAdded = mergeSeedBirthdates();
+      const saved = saveToStorage();
+      SEED_MERGE_REPORT = { version: seedVersion, added, birthdates: bAdded, renamed: st.renamed };
+      // Si l'enregistrement a échoué, on refera la fusion au prochain démarrage.
+      if (saved) { try { localStorage.setItem(SEED_APPLIED_KEY, seedVersion); } catch (e) {} }
+    }
   } else {
     DB = SEED_DATA.map(r => ensureCategorie({...r}));
-    saveToStorage();
+    NEXT_ID = DB.reduce((m, r) => Math.max(m, r.id || 0), 0) + 1;
+    mergeSeedBirthdates();
+    if (saveToStorage() && seedVersion) { try { localStorage.setItem(SEED_APPLIED_KEY, seedVersion); } catch (e) {} }
   }
-  NEXT_ID = DB.reduce((m, r) => Math.max(m, r.id || 0), 0) + 1;
+}
+
+// Génère le fichier data.js à publier sur GitHub (base actuelle + dates de naissance).
+function buildDataJsForPublication() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const version = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const records = [...DB]
+    .sort((a, b) => (a.annee - b.annee) || String(a.sexe).localeCompare(String(b.sexe)) || String(a.epreuve).localeCompare(String(b.epreuve), "fr") || String(a.nom).localeCompare(String(b.nom), "fr"))
+    .map((r, i) => {
+      const o = { ...r, id: i + 1 };
+      Object.keys(o).forEach(k => { if (k.startsWith("_") || o[k] === undefined) delete o[k]; });
+      return o;
+    });
+  const years = uniqueSorted(records.map(r => r.annee));
+  const birthdates = loadBirthdates();
+  const lines = [
+    "// Base BSGA Palmarès publiée — générée par l'application le " + now.toLocaleString("fr-FR") + ".",
+    "// " + records.length + " résultats (" + years.join(", ") + "), " + Object.keys(birthdates).length + " dates de naissance.",
+    "// Ce fichier remplace data.js sur GitHub : chaque appareil y ajoutera automatiquement les résultats qui lui manquent.",
+    "// © Kevin Marq Product — Tous droits réservés.",
+    "const SEED_VERSION = " + JSON.stringify(version) + ";",
+    "const SEED_LAST_IMPORT = " + JSON.stringify(getLastImport() || null) + ";",
+    "const SEED_BIRTHDATES = " + JSON.stringify(birthdates, null, 1) + ";",
+    "const SEED_DATA = [",
+    records.map(r => "  " + JSON.stringify(r)).join(",\n"),
+    "];",
+    ""
+  ];
+  return { content: lines.join("\n"), count: records.length, birthdates: Object.keys(birthdates).length, version };
 }
 
 /* ---------------- Toasts ---------------- */
@@ -185,6 +457,44 @@ function normStr(s) {
 
 function normEpreuve(e) {
   return normStr(e).replace(/\s*\|\s*VENT\s*:\s*[A-Z]+\s*$/i, "").trim();
+}
+
+/* ---------- Chronométrage électrique / manuel ----------
+   athle.fr indique pour chaque course "E" (électrique) ou "M" (manuel).
+   Pour les résultats plus anciens sans cette information, on la déduit du format :
+   un temps au centième (7''76) est électrique, un temps au dixième (7''6) est manuel.
+   Les deux ne sont pas comparables : classements, records et meilleures performances
+   sont donc établis séparément pour les temps manuels. */
+function getChronoType(r) {
+  const c = String(r.chrono || "").trim().toUpperCase();
+  if (c === "E" || c === "M") return c;
+  const perf = String(r.performance || "").replace(/\(.*?\)/g, "").trim();
+  const m = perf.match(/(?:''|"|″)\s*(\d+)\s*$/);
+  if (!m) return null;
+  if (m[1].length >= 2) return "E";
+  if (m[1].length === 1) return "M";
+  return null;
+}
+// Classement séparé (par défaut) : les temps manuels forment leur propre classement.
+// Mode "combiné" (filtre Chronométrage) : électrique et manuel dans un même classement.
+function epKeySeparate(r) {
+  return normEpreuve(r.epreuve) + (getChronoType(r) === "M" ? "#manuel" : "");
+}
+function isChronoCombined() {
+  return typeof explorerFilters !== "undefined" && explorerFilters.chrono === "C";
+}
+function epKey(r) {
+  return isChronoCombined() ? normEpreuve(r.epreuve) : epKeySeparate(r);
+}
+function chronoBadge(r) {
+  const t = getChronoType(r);
+  if (t === "M") return el("span", { class: "chrono-badge man", title: "Chronométrage manuel" }, "manuel");
+  if (t === "E") return el("span", { class: "chrono-badge elec", title: "Chronométrage électrique" }, "élec.");
+  return "";
+}
+function chronoLabel(r) {
+  const t = getChronoType(r);
+  return t === "M" ? "Manuel" : t === "E" ? "Électrique" : "";
 }
 
 function normPerf(perf) {
@@ -368,10 +678,47 @@ function setupNav() {
       if (btn.dataset.page === "explorer") renderExplorer();
       if (btn.dataset.page === "athletes") renderAthletesList();
       if (btn.dataset.page === "settings") renderSettings();
+      if (btn.dataset.page === "cotation") renderCotationPage();
       // Sur mobile, remonter en haut de page à chaque changement d'écran
       window.scrollTo(0, 0);
     });
   });
+}
+
+/* ---------- Date du dernier import de résultats ----------
+   Mémorisée sur l'appareil à chaque validation d'import, et publiée dans data.js
+   (SEED_LAST_IMPORT) : on affiche la plus récente des deux. */
+const LAST_IMPORT_KEY = "bsga_dernier_import";
+function getLastImport() {
+  let local = null;
+  try { local = JSON.parse(localStorage.getItem(LAST_IMPORT_KEY) || "null"); } catch (e) {}
+  const seed = (typeof SEED_LAST_IMPORT !== "undefined" && SEED_LAST_IMPORT) ? SEED_LAST_IMPORT : null;
+  if (local && seed) return String(local.date) >= String(seed.date) ? local : seed;
+  return local || seed;
+}
+function setLastImport(count, years) {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const iso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  try { localStorage.setItem(LAST_IMPORT_KEY, JSON.stringify({ date: iso, count, years })); } catch (e) {}
+}
+function formatImportDate(info, withTime) {
+  if (!info || !info.date) return "jamais";
+  const [d, t] = String(info.date).split("T");
+  const [y, m, j] = d.split("-");
+  return `${j}/${m}/${y}` + (withTime && t ? ` à ${t.slice(0,5).replace(":", "h")}` : "");
+}
+// Date de la performance la plus récente de la base (champ "date" au format JJ/MM/AA)
+function getLatestResultDate() {
+  let best = null, bestKey = "";
+  DB.forEach(r => {
+    const m = String(r.date || "").match(/^(\d{2})\/(\d{2})\/(\d{2,4})$/);
+    if (!m) return;
+    const y = m[3].length === 2 ? "20" + m[3] : m[3];
+    const key = y + m[2] + m[1];
+    if (key > bestKey) { bestKey = key; best = `${m[1]}/${m[2]}/${y}`; }
+  });
+  return best;
 }
 
 function updateSidebarCount() {
@@ -379,6 +726,27 @@ function updateSidebarCount() {
   document.querySelectorAll("#sb-count, #sb-count-mobile").forEach(el => {
     el.textContent = DB.length;
   });
+  const info = getLastImport();
+  const latest = getLatestResultDate();
+  const sb = document.getElementById("sb-last-import");
+  if (sb) sb.textContent = "Dernier import : " + formatImportDate(info, false);
+  const imp = document.getElementById("importLastImport");
+  if (imp) {
+    imp.innerHTML = "";
+    const parts = [el("span", {}, "Dernier import des résultats : "), el("b", {}, formatImportDate(info, true))];
+    if (info && info.count) {
+      const ys = info.years || [];
+      parts.push(el("span", {}, ` · ${info.count} résultat${info.count > 1 ? "s" : ""} ajouté${info.count > 1 ? "s" : ""}` +
+        (ys.length ? ` (${ys.length > 3 ? ys[0] + "–" + ys[ys.length - 1] : ys.join(", ")})` : "")));
+    }
+    if (latest) parts.push(el("span", {}, " · résultats jusqu'au "), el("b", {}, latest));
+    parts.forEach(p => imp.appendChild(p));
+  }
+  const dash = document.getElementById("dashLastImport");
+  if (dash) {
+    dash.textContent = "Dernier import des résultats : " + formatImportDate(info, true) +
+      (latest ? ` · résultats jusqu'au ${latest}` : "");
+  }
 }
 
 /* ===========================================================
@@ -460,18 +828,20 @@ function renderDashboard() {
   // Chart 2 : repartition par categorie d'age, en nombre d'athletes distincts
   // (et non en nombre de resultats : un athlete avec 16 resultats ne doit compter
   // qu'une seule fois dans sa categorie, pour refleter l'effectif reel du club).
-  const CATEGORIE_ORDER = ["Benjamin", "Minime", "Cadet", "Junior", "Espoir", "Senior", "Master (Vétéran)", "Non déterminée"];
+  // Familles de catégories (garçons et filles ensemble : Benjamins = benjamins + benjamines)
+  const CATEGORIE_ORDER = CAT_FAMILY_ORDER;
   const CATEGORIE_COLORS = {
-    "Benjamin": "#7FB3D5", "Minime": "#5499C7", "Cadet": "#2E86C1",
-    "Junior": "#E8411A", "Espoir": "#C9390F", "Senior": "#0D5E8E",
-    "Master (Vétéran)": "#D4AF37", "Non déterminée": "#C3D3D8"
+    "Baby Athlé": "#D6E6EE", "Éveil Athlétique": "#BBD6E4", "Poussins": "#A3CBE0",
+    "Benjamins": "#7FB3D5", "Minimes": "#5499C7", "Cadets": "#2E86C1",
+    "Juniors": "#E8411A", "Espoirs": "#C9390F", "Seniors": "#0D5E8E",
+    "Masters": "#D4AF37", "Non déterminée": "#C3D3D8"
   };
   const athleteCategorie = {};
   rows.forEach(r => {
     const n = (r.nom || "").trim();
     if (!n) return; // resultats sans athlete nomme (relais) : exclus du comptage par athlete
     const key = normStr(n);
-    if (!athleteCategorie[key]) athleteCategorie[key] = r.categorie || "Non déterminée";
+    if (!athleteCategorie[key]) athleteCategorie[key] = catFamily(r.categorie);
   });
   const byCategorie = {};
   Object.values(athleteCategorie).forEach(c => { byCategorie[c] = (byCategorie[c] || 0) + 1; });
@@ -556,14 +926,60 @@ document.getElementById("exportDashPdf").addEventListener("click", () => exportD
    EXPLORER — filtres, tri, table
    =========================================================== */
 let explorerSort = { key: "annee", dir: "desc" };
-let explorerFilters = { annee: [], sexe: [], groupe: [], epreuve: [], categorie: [], nom: "", podium: "", record: "" };
+let explorerFilters = { annee: [], sexe: [], groupe: [], epreuve: [], categorie: [], nom: "", podium: "", record: "", chrono: "" };
 
 function populateExplorerFilters() {
   setMultiOptions("f-annee", uniqueSorted(DB.map(r => r.annee)).reverse());
+  syncYearChips("f-annee");
   setMultiOptions("f-sexe", uniqueSorted(DB.map(r => r.sexe)));
   setMultiOptions("f-groupe", uniqueSorted(DB.map(r => r.groupe)));
-  setMultiOptions("f-categorie", uniqueSorted(DB.map(r => r.categorie || "Non déterminée")));
+  const catValues = sortCategories([...new Set(DB.map(catLabel))]);
+  if (catValues.some(c => /^Master M/.test(c))) catValues.splice(catValues.findIndex(c => catFamily(c) === "Masters"), 0, ALL_MASTERS_OPTION);
+  setMultiOptions("f-categorie", catValues);
   refreshEpreuveOptions();
+}
+
+/* Pastilles d'années (choix multiple) reliées à un <select multiple> caché, qui reste
+   la source des valeurs pour le reste du code. Aucune pastille = toutes les années. */
+function yearsLabel(years) {
+  const ys = years.map(Number).sort((a, b) => a - b);
+  if (!ys.length) return "Toutes années";
+  const contiguous = ys.every((y, i) => i === 0 || y === ys[i - 1] + 1);
+  if (ys.length >= 3 && contiguous) return `${ys[0]}–${ys[ys.length - 1]}`;
+  return ys.join(", ");
+}
+function syncYearChips(selectId) {
+  const sel = document.getElementById(selectId);
+  const box = document.getElementById(selectId + "-chips");
+  if (!sel || !box) return;
+  const values = Array.from(sel.options).map(o => o.value);
+  const chosen = new Set(Array.from(sel.selectedOptions).map(o => o.value));
+  // (re)construction si la liste des années a changé
+  if (box.dataset.values !== values.join(",")) {
+    box.dataset.values = values.join(",");
+    box.innerHTML = "";
+    const all = el("button", { type: "button", class: "cot-chip year-chip", "data-v": "" }, box.dataset.allLabel || "Toutes");
+    all.addEventListener("click", () => {
+      Array.from(sel.options).forEach(o => { o.selected = false; });
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    box.appendChild(all);
+    values.forEach(v => {
+      const b = el("button", { type: "button", class: "cot-chip year-chip", "data-v": v }, v);
+      b.addEventListener("click", () => {
+        const o = Array.from(sel.options).find(x => x.value === v);
+        if (o) o.selected = !o.selected;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      box.appendChild(b);
+    });
+  }
+  box.querySelectorAll(".year-chip").forEach(b => {
+    const v = b.dataset.v;
+    const on = v === "" ? chosen.size === 0 : chosen.has(v);
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
 }
 
 function setMultiOptions(id, values) {
@@ -593,6 +1009,7 @@ function readExplorerFilters() {
   explorerFilters.nom = document.getElementById("f-nom").value.trim();
   explorerFilters.podium = document.getElementById("f-podium").value;
   explorerFilters.record = document.getElementById("f-record") ? document.getElementById("f-record").value : "";
+  explorerFilters.chrono = document.getElementById("f-chrono") ? document.getElementById("f-chrono").value : "";
 }
 
 function applyExplorerFilters() {
@@ -602,19 +1019,22 @@ function applyExplorerFilters() {
   if (f.sexe.length) rows = rows.filter(r => f.sexe.includes(String(r.sexe)));
   if (f.groupe.length) rows = rows.filter(r => f.groupe.includes(r.groupe));
   if (f.epreuve.length) rows = rows.filter(r => f.epreuve.includes(r.epreuve));
-  if (f.categorie.length) rows = rows.filter(r => f.categorie.includes(r.categorie || "Non déterminée"));
+  if (f.categorie.length) rows = rows.filter(r => f.categorie.includes(catLabel(r)) ||
+    (f.categorie.includes(ALL_MASTERS_OPTION) && catFamily(r.categorie) === "Masters"));
   if (f.nom) {
     const q = normStr(f.nom);
     rows = rows.filter(r => normStr(r.nom).includes(q));
   }
+  if (f.chrono === "E") rows = rows.filter(r => getChronoType(r) === "E");
+  if (f.chrono === "M") rows = rows.filter(r => getChronoType(r) === "M");
   if (f.podium === "1") rows = rows.filter(r => String(r.place) === "1");
   if (f.podium === "podium") rows = rows.filter(r => ["1","2","3"].includes(String(r.place)));
   if (f.record) {
     const clubRecords = computeClubRecords();
     const clubRecordsAbs = computeClubRecordsAbsolute();
     rows = rows.filter(r => {
-      const recKey = normEpreuve(r.epreuve) + "|" + normStr(r.categorie || "Non determinee");
-      const isRecordAbs = clubRecordsAbs.has(normEpreuve(r.epreuve)) && clubRecordsAbs.get(normEpreuve(r.epreuve)).ids.has(r.id);
+      const recKey = epKey(r) + "|" + normStr(catLabel(r));
+      const isRecordAbs = clubRecordsAbs.has(epKey(r)) && clubRecordsAbs.get(epKey(r)).ids.has(r.id);
       const isRecord = clubRecords.has(recKey) && clubRecords.get(recKey).ids.has(r.id);
       if (f.record === "abs") return isRecordAbs;
       if (f.record === "cat") return isRecord && !isRecordAbs;
@@ -628,7 +1048,7 @@ function applyExplorerFilters() {
 function hasActiveExplorerFilters() {
   const f = explorerFilters;
   return f.annee.length > 0 || f.sexe.length > 0 || f.groupe.length > 0 ||
-         f.epreuve.length > 0 || f.categorie.length > 0 || !!f.nom || !!f.podium || !!f.record;
+         f.epreuve.length > 0 || f.categorie.length > 0 || !!f.nom || !!f.podium || !!f.record || !!f.chrono;
 }
 
 // Quand au moins un filtre est actif, la place affichée ne doit plus être celle
@@ -645,9 +1065,9 @@ function withRecomputedPlaces(rows) {
 
   const byEpreuveKey = {};
   rows.forEach(r => {
-    const parts = [normEpreuve(r.epreuve)];
+    const parts = [epKey(r)];
     if (sexeActif) parts.push(normStr(r.sexe));
-    if (categorieActif) parts.push(normStr(r.categorie || "Non determinee"));
+    if (categorieActif) parts.push(normStr(catLabel(r)));
     const key = parts.join("|");
     if (!byEpreuveKey[key]) byEpreuveKey[key] = [];
     byEpreuveKey[key].push(r);
@@ -717,7 +1137,7 @@ function computeClubRecords() {
   DB.forEach(r => {
     const p = parsePerformance(r.performance, r.epreuve);
     if (!p) return;
-    const key = normEpreuve(r.epreuve) + "|" + normStr(r.categorie || "Non determinee");
+    const key = epKey(r) + "|" + normStr(catLabel(r));
     if (!records.has(key)) {
       records.set(key, { value: p.value, higherIsBetter: p.higherIsBetter, ids: new Set([r.id]) });
     } else {
@@ -738,7 +1158,7 @@ function computeClubRecordsAbsolute() {
   DB.forEach(r => {
     const p = parsePerformance(r.performance, r.epreuve);
     if (!p) return;
-    const key = normEpreuve(r.epreuve);
+    const key = epKey(r);
     if (!records.has(key)) {
       records.set(key, { value: p.value, higherIsBetter: p.higherIsBetter, ids: new Set([r.id]) });
     } else {
@@ -802,6 +1222,7 @@ function renderActiveChips() {
   f.categorie.forEach(v => addChip("Catégorie: " + v, () => toggleMultiValue("f-categorie", v)));
   if (f.record) { const rl = {"abs":"👑 Records absolus","cat":"🏆 Records catégorie","both":"👑+🏆 Tous records"}; addChip(rl[f.record]||f.record, () => { const el=document.getElementById("f-record"); if(el) el.value=""; onExplorerFilterChange(); }); }
   if (f.nom) addChip("Nom: " + f.nom, () => { document.getElementById("f-nom").value = ""; onExplorerFilterChange(); });
+  if (f.chrono) addChip({ M: "⏱ Manuel uniquement", E: "⏱ Électrique uniquement", C: "⏱ Électrique + manuel combinés" }[f.chrono] || f.chrono, () => { document.getElementById("f-chrono").value = ""; onExplorerFilterChange(); });
   if (f.podium) addChip(f.podium === "1" ? "1ère place" : "Top 3", () => { document.getElementById("f-podium").value = ""; onExplorerFilterChange(); });
 }
 
@@ -812,6 +1233,7 @@ function toggleMultiValue(selectId, value) {
 }
 
 function onExplorerFilterChange() {
+  syncYearChips("f-annee");
   if (document.getElementById("f-groupe")) refreshEpreuveOptions();
   readExplorerFilters();
   renderActiveChips();
@@ -853,9 +1275,9 @@ function renderExplorerTable() {
   const frag = document.createDocumentFragment();
   rows.forEach(r => {
     const displayPlace = r._displayPlace != null ? r._displayPlace : r.place;
-    const recordKey = normEpreuve(r.epreuve) + "|" + normStr(r.categorie || "Non determinee");
+    const recordKey = epKey(r) + "|" + normStr(catLabel(r));
     const rec = clubRecords.get(recordKey);
-    const recAbs = clubRecordsAbs.get(normEpreuve(r.epreuve));
+    const recAbs = clubRecordsAbs.get(epKey(r));
     const isRecordAbs = recAbs && recAbs.ids.has(r.id);
     const isRecord = rec && rec.ids.has(r.id);
 
@@ -888,9 +1310,9 @@ function renderExplorerTable() {
       el("td", {}, el("span", { class: "tag-pill" }, r.sexe)),
       el("td", { title: r.groupe }, r.groupe),
       el("td", { title: r.epreuve }, r.epreuve),
-      el("td", { title: r.categorie || "Non déterminée" }, r.categorie || "Non déterminée"),
+      el("td", { title: catLabel(r) + (/^Master M/.test(catLabel(r)) ? " — " + masterSubRange(catLabel(r).slice(7)) : "") }, catLabel(r)),
       el("td", {}, el("span", { class: placePillClass(displayPlace) }, String(displayPlace))),
-      el("td", { class: perfClass }, perfPrefix + r.performance),
+      el("td", { class: perfClass }, [perfPrefix + r.performance, chronoBadge(r)]),
       nomCell,
       niveauCell
     ]);
@@ -899,7 +1321,7 @@ function renderExplorerTable() {
   tbody.appendChild(frag);
 }
 
-["f-annee","f-sexe","f-groupe","f-epreuve","f-categorie","f-podium","f-record"].forEach(id => {
+["f-annee","f-sexe","f-groupe","f-epreuve","f-categorie","f-podium","f-record","f-chrono"].forEach(id => {
   document.addEventListener("change", (e) => { if (e.target.id === id) onExplorerFilterChange(); });
 });
 document.getElementById("f-nom").addEventListener("input", () => onExplorerFilterChange());
@@ -911,6 +1333,7 @@ document.getElementById("resetFilters").addEventListener("click", () => {
   document.getElementById("f-nom").value = "";
   document.getElementById("f-podium").value = "";
   const recSel = document.getElementById("f-record"); if (recSel) recSel.value = "";
+  const chrSel = document.getElementById("f-chrono"); if (chrSel) chrSel.value = "";
   onExplorerFilterChange();
 });
 
@@ -976,7 +1399,7 @@ function bestNiveauForGroup(rows, groupeDb) {
 function bestForColKeyAcross(rows, colKey) {
   let best = 0;
   for (const r of rows) {
-    if (COTATION_EPREUVE_MAP[r.epreuve] !== colKey) continue;
+    if (cotationColFor(r.epreuve) !== colKey) continue;
     const n = getNiveauFFAForRow(r);
     if (n && n > best) best = n;
   }
@@ -993,6 +1416,102 @@ function getAthletesAggregated() {
     map[n].push(r);
   });
   return map;
+}
+
+// ── Dates de naissance & catégorie d'âge FFA en cours ──
+// Saison sportive : du 1er septembre au 31 août inclus.
+// La catégorie FFA se détermine sur l'année civile de fin de saison
+// (ex. saison 2025-2026, du 01/09/2025 au 31/08/2026 → référence 2026),
+// par différence avec l'année de naissance.
+const BIRTHDATES_KEY = "bsga_birthdates";
+
+function loadBirthdates() {
+  try { return JSON.parse(localStorage.getItem(BIRTHDATES_KEY) || "{}"); } catch(e) { return {}; }
+}
+function saveBirthdateFor(nom, dateStr) {
+  const all = loadBirthdates();
+  if (dateStr) all[nom] = dateStr; else delete all[nom];
+  try { localStorage.setItem(BIRTHDATES_KEY, JSON.stringify(all)); } catch(e) { console.error(e); }
+}
+
+// Année de référence de la saison en cours : jusqu'au 31 août inclus on reste
+// dans la saison qui se termine cette année ; à partir du 1er septembre on passe
+// à la saison suivante.
+function getCurrentSeasonRefYear(d) {
+  d = d || new Date();
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1; // 1-12
+  return m >= 9 ? y + 1 : y;
+}
+function getCurrentSeasonLabel(d) {
+  const ref = getCurrentSeasonRefYear(d);
+  return `${ref - 1}-${ref}`;
+}
+
+// Barème d'âge FFA (catégories basées sur l'année de naissance)
+// Âge atteint dans l'année de fin de saison (diff = année de réf. − année de naissance).
+// Barème FFA vérifié sur les codes athle.fr des saisons 2022 à 2027 :
+// U12 Poussin 10-11 · U14 Benjamin 12-13 · U16 Minime 14-15 · U18 Cadet 16-17 ·
+// U20 Junior 18-19 · U23 Espoir 20-22 · Senior 23-34 · Master 35+.
+function categorieFromAgeDiff(diff, sexe) {
+  if (diff <= 6) return "Baby Athlé";
+  if (diff <= 9) return "Éveil Athlétique";
+  if (diff <= 11) return sexe === "F" ? "Poussine" : "Poussin";
+  if (diff <= 13) return sexe === "F" ? "Benjamine" : "Benjamin";
+  if (diff <= 15) return "Minime";
+  if (diff <= 17) return sexe === "F" ? "Cadette" : "Cadet";
+  if (diff <= 19) return "Junior";
+  if (diff <= 22) return "Espoir";
+  if (diff <= 34) return "Senior";
+  return "Master " + masterSubCode(diff);
+}
+
+function computeCategorieFromBirthdate(dateStr, sexe) {
+  if (!dateStr) return null;
+  const birthYear = parseInt(String(dateStr).slice(0, 4), 10);
+  if (!birthYear || isNaN(birthYear)) return null;
+  const diff = getCurrentSeasonRefYear() - birthYear;
+  if (diff < 0) return null;
+  return categorieFromAgeDiff(diff, sexe);
+}
+
+// Catégorie "en cours" : calculée depuis la date de naissance si connue,
+// sinon dernière catégorie connue dans les résultats importés.
+// Année de naissance connue par les résultats FFA (champ anneeNaissance)
+function getAthleteBirthYear(rows) {
+  const count = {};
+  (rows || []).forEach(r => { const y = parseInt(r.anneeNaissance, 10); if (y) count[y] = (count[y] || 0) + 1; });
+  const years = Object.keys(count);
+  if (!years.length) return null;
+  years.sort((a, b) => count[b] - count[a]);
+  return { year: parseInt(years[0], 10), ambiguous: years.length > 1, all: years.map(Number).sort() };
+}
+
+// Texte de la date de naissance d'un athlète : date saisie si elle existe,
+// sinon année de naissance donnée par la FFA.
+function formatAthleteBirth(nom, rows) {
+  const d = loadBirthdates()[nom];
+  if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) { const [y, m, j] = d.split("-"); return `${j}/${m}/${y}`; }
+  const by = getAthleteBirthYear(rows);
+  if (by) return `${by.year}` + (by.ambiguous ? ` (années trouvées : ${by.all.join(", ")})` : "");
+  return "inconnue";
+}
+
+function getCurrentCategorieForAthlete(nom, rows) {
+  const dateStr = loadBirthdates()[nom];
+  const sexe = rows && rows.length ? rows[0].sexe : null;
+  if (dateStr) {
+    const cat = computeCategorieFromBirthdate(dateStr, sexe);
+    if (cat) return { label: cat, computed: true, source: "date", year: parseInt(dateStr.slice(0, 4), 10) };
+  }
+  const by = getAthleteBirthYear(rows);
+  if (by) {
+    const cat = computeCategorieFromBirthdate(String(by.year), sexe);
+    if (cat) return { label: cat, computed: true, source: "ffa", year: by.year, ambiguous: by.ambiguous };
+  }
+  const sorted = rows ? [...rows].sort((a, b) => b.annee - a.annee) : [];
+  const fallback = sorted.length ? catLabel(sorted[0]) : null;
+  return { label: fallback || "Non déterminée", computed: false };
 }
 
 function goToAthlete(name) {
@@ -1022,9 +1541,15 @@ function renderAthletesList(filterText = "") {
   const tbody = document.getElementById("athleteList");
   tbody.innerHTML = "";
   filtered.forEach(name => {
+    const cat = getCurrentCategorieForAthlete(name, map[name]);
+    const catCell = cat.computed
+      ? el("td", { title: (cat.source === "ffa" ? "Calculée depuis l'année de naissance FFA" : "Calculée depuis la date de naissance saisie") + " (saison " + getCurrentSeasonLabel() + ")" }, cat.label)
+      : el("td", { style: "color:var(--grey-dim);font-style:italic;", title: "Année de naissance inconnue — dernière catégorie connue" }, cat.label);
     const tr = el("tr", { style: "cursor:pointer;" }, [
       el("td", {}, name),
-      el("td", {}, String(map[name].length))
+      el("td", {}, String(map[name].length)),
+      el("td", { style: "font-family:var(--font-mono);color:var(--grey);" }, cat.year ? String(cat.year) : "—"),
+      catCell
     ]);
     tr.addEventListener("click", () => selectAthlete(name));
     if (selectedAthlete === name) tr.style.background = "rgba(244,163,0,0.10)";
@@ -1032,7 +1557,7 @@ function renderAthletesList(filterText = "") {
   });
 
   if (!filtered.length) {
-    tbody.appendChild(el("tr", {}, el("td", { colspan: "2" }, el("div", { class: "empty-state" }, "Aucun athlète trouvé"))));
+    tbody.appendChild(el("tr", {}, el("td", { colspan: "4" }, el("div", { class: "empty-state" }, "Aucun athlète trouvé"))));
   }
 }
 
@@ -1061,6 +1586,42 @@ function selectAthlete(name) {
   body.appendChild(statGrid);
   body.appendChild(el("div", { class: "legend-note" }, "Actif sur : " + years.join(", ")));
 
+  // ── Date de naissance & catégorie FFA en cours ──
+  const savedBirthdate = loadBirthdates()[name] || "";
+  const birthdateInput = el("input", { type: "date", value: savedBirthdate, id: "athleteBirthdateInput",
+    style: "border:1px solid var(--line-strong);border-radius:5px;padding:4px 8px;font-size:12px;color:var(--ink);background:#fff;" });
+  const catBadge = el("span", { id: "athleteCurrentCatBadge" });
+  const saveBtn = el("button", { class: "btn small", style: "font-size:11px;padding:4px 10px;" }, "Enregistrer");
+  const birthInfo = el("span", { id: "athleteBirthYearInfo" });
+  const refreshCatBadge = () => {
+    const cat = getCurrentCategorieForAthlete(name, rows);
+    const range = /^Master M\d+/.test(cat.label) ? " (" + masterSubRange(cat.label.slice(7)) + ")" : "";
+    catBadge.textContent = cat.label + range + (cat.computed ? "" : " (estimée)");
+    birthInfo.textContent = formatAthleteBirth(name, rows);
+    catBadge.style.cssText = cat.computed
+      ? "font-weight:700;color:var(--navy);"
+      : "font-weight:700;color:var(--grey-dim);font-style:italic;";
+  };
+  saveBtn.addEventListener("click", () => {
+    saveBirthdateFor(name, birthdateInput.value);
+    refreshCatBadge();
+    renderAthletesList(document.getElementById("athleteSearch").value);
+    toast("Date de naissance enregistrée", "success");
+  });
+  refreshCatBadge();
+  body.appendChild(el("div", { style: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;font-size:12.5px;color:var(--grey);" }, [
+    el("span", {}, "Date de naissance :"), el("b", { style: "color:var(--ink);" }, birthInfo)
+  ]));
+  body.appendChild(el("div", { style: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px;font-size:12.5px;color:var(--grey);" }, [
+    el("span", {}, "Catégorie " + getCurrentSeasonLabel() + " :"), catBadge
+  ]));
+  // Saisie manuelle seulement si la FFA ne donne pas l'année de naissance
+  if (!getAthleteBirthYear(rows)) {
+    body.appendChild(el("div", { style: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px;font-size:11.5px;color:var(--grey-dim);" }, [
+      "Saisir la date de naissance :", birthdateInput, saveBtn
+    ]));
+  }
+
   // Badge de niveau moyen cotation FFA (si table disponible)
   renderAthleteCotationBadge(rows);
 
@@ -1073,7 +1634,7 @@ function selectAthlete(name) {
   rows.forEach(r => {
     const p = parsePerformance(r.performance, r.epreuve);
     if (!p) return;
-    const key = normEpreuve(r.epreuve);
+    const key = epKey(r);
     if (!bestByEpreuve.has(key)) {
       bestByEpreuve.set(key, { r, p });
     } else {
@@ -1107,7 +1668,8 @@ function selectAthlete(name) {
   const notice = el("div", { class: "legend-note", style: "margin-bottom:10px; display:flex; gap:16px; flex-wrap:wrap;" }, [
     el("span", {}, "⭐ = Meilleure performance personnelle (toutes saisons)"),
     el("span", {}, "🏆 = Record du club dans sa catégorie d'âge"),
-    el("span", {}, "👑 = Record absolu du club toutes catégories confondues")
+    el("span", {}, "👑 = Record absolu du club toutes catégories confondues"),
+    el("span", {}, "« manuel » = chrono manuel, classé à part des chronos électriques")
   ]);
   document.getElementById("athleteTablePanel").insertBefore(notice,
     document.getElementById("athleteTablePanel").querySelector(".table-wrap"));
@@ -1116,9 +1678,9 @@ function selectAthlete(name) {
   const tbody = document.getElementById("athleteTableBody");
   tbody.innerHTML = "";
   rows.forEach(r => {
-    const recKey = normEpreuve(r.epreuve) + "|" + normStr(r.categorie || "Non determinee");
+    const recKey = epKey(r) + "|" + normStr(catLabel(r));
     const rec = clubRecords.get(recKey);
-    const recAbs = clubRecordsAbs.get(normEpreuve(r.epreuve));
+    const recAbs = clubRecordsAbs.get(epKey(r));
     const isRecordAbs = recAbs && recAbs.ids.has(r.id);
     const isRecord = rec && rec.ids.has(r.id);
     const isBest = bestIds.has(r.id);
@@ -1151,9 +1713,9 @@ function selectAthlete(name) {
       el("td", {}, String(r.annee)),
       el("td", { title: r.groupe }, r.groupe),
       el("td", { title: r.epreuve }, r.epreuve),
-      el("td", { title: r.categorie || "Non déterminée" }, r.categorie || "Non déterminée"),
+      el("td", { title: catLabel(r) + (/^Master M/.test(catLabel(r)) ? " — " + masterSubRange(catLabel(r).slice(7)) : "") }, catLabel(r)),
       el("td", {}, el("span", { class: placePillClass(r.place) }, String(r.place))),
-      el("td", { class: perfClass }, perfPrefix + r.performance),
+      el("td", { class: perfClass }, [perfPrefix + r.performance, chronoBadge(r)]),
       niveauCell
     ]));
   });
@@ -1324,12 +1886,23 @@ function loadPdfJs() {
    source fiable de categorie : on ne la devine jamais a partir du poids d'un engin ou d'une
    hauteur de haies (voir guessCategorie). */
 const CAT_LABELS_FFA = {
-  BBM: "Baby Athlé", BBF: "Baby Athlé", EAM: "École d'Athlétisme", EAF: "École d'Athlétisme",
+  BBM: "Baby Athlé", BBF: "Baby Athlé", EAM: "Éveil Athlétique", EAF: "Éveil Athlétique",
   POM: "Poussin", POF: "Poussine", BEM: "Benjamin", BEF: "Benjamine",
   MIM: "Minime", MIF: "Minime", CAM: "Cadet", CAF: "Cadette",
   JUM: "Junior", JUF: "Junior", ESM: "Espoir", ESF: "Espoir",
-  SEM: "Senior", SEF: "Senior", MAM: "Master (Vétéran)", MAF: "Master (Vétéran)"
+  SEM: "Senior", SEF: "Senior", MAM: "Master", MAF: "Master"
 };
+
+// Année de naissance contenue dans le code « Infos » d'athle.fr : MIF/13 → 2013,
+// MAM/62 → 1962. Le siècle est choisi pour que l'athlète soit né avant la saison.
+function birthYearFromCode(code, saison) {
+  const m = String(code || "").match(/\/\s*(\d{2})\s*$/);
+  if (!m) return null;
+  let y = 2000 + parseInt(m[1], 10);
+  const ref = parseInt(saison, 10) || new Date().getFullYear();
+  if (y > ref) y -= 100;
+  return y;
+}
 
 function decodeCategorieFFA(code) {
   if (!code) return "Non déterminée";
@@ -1342,53 +1915,15 @@ function parseHtmlFile(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(e.target.result, "text/html");
-        const table = doc.querySelector("table");
-        if (!table) {
-          resolve({ results: [], errors: ["Aucun tableau de résultats trouvé dans ce fichier HTML."] });
-          return;
-        }
-        const rows = Array.from(table.querySelectorAll("tr"));
-        const headerRe = /^(\d{4})\s*\|\s*(.+?)\s*\|\s*([MF])\s*(?:\|.*)?$/i;
-        const placeRe = /^(\d+|-)$/;
-
-        let currentEpreuve = null, currentAnnee = null, currentSexe = null;
-        const results = [];
-
-        rows.forEach(r => {
-          const headerDiv = r.querySelector("div.headers");
-          if (headerDiv) {
-            const m = headerDiv.textContent.trim().match(headerRe);
-            if (m) {
-              currentAnnee = parseInt(m[1], 10);
-              currentEpreuve = m[2].trim();
-              currentSexe = m[3].toUpperCase();
-            }
-            return;
-          }
-          const tds = Array.from(r.querySelectorAll("td"));
-          if (tds.length >= 7 && currentEpreuve) {
-            const cells = tds.map(td => td.textContent.trim());
-            if (placeRe.test(cells[0])) {
-              results.push({
-                annee: currentAnnee,
-                sexe: currentSexe,
-                club: "077108",
-                groupe: guessGroupe(currentEpreuve),
-                epreuve: currentEpreuve,
-                place: cells[0],
-                performance: cells[1],
-                nom: cells[2],
-                categorie: decodeCategorieFFA(cells[6] || "")
-              });
-            }
-          }
-        });
-
-        if (!results.length) {
+        const doc = new DOMParser().parseFromString(e.target.result, "text/html");
+        const ex = ffaExtractFromDocument(doc, "");
+        if (!ex.rows.length) {
           resolve({ results: [], errors: ["Aucune ligne de résultat reconnue dans ce fichier HTML."] });
           return;
+        }
+        const results = normalizeImportedRecords(ex.rows);
+        if (ex.pages.length > 1) {
+          toast(`Ce fichier ne contient qu'une page sur ${ex.pages.length} : utilisez plutôt le bouton « Envoyer au Palmarès BSGA » pour tout récupérer`, "");
         }
         resolve({ results, errors: [] });
       } catch (err) {
@@ -1446,18 +1981,7 @@ function parseJsonFile(file) {
           resolve({ results: [], errors: ["Le fichier JSON ne contient pas une liste de résultats."] });
           return;
         }
-        const results = data.map(r => ({
-          annee: parseInt(r.annee, 10),
-          sexe: (r.sexe || "M").toUpperCase(),
-          club: r.club || "077108",
-          groupe: r.groupe || guessGroupe(r.epreuve || ""),
-          epreuve: r.epreuve,
-          place: String(r.place),
-          performance: r.performance,
-          nom: r.nom,
-          categorie: r.categorie || guessCategorie(r.epreuve || "")
-        })).filter(r => r.epreuve && r.nom && r.performance);
-        resolve({ results, errors: [] });
+        resolve({ results: normalizeImportedRecords(data), errors: [] });
       } catch (err) {
         resolve({ results: [], errors: ["JSON invalide : " + err.message] });
       }
@@ -1521,7 +2045,7 @@ function renderDiffPanel(annotated, errCount, newCount, dupCount) {
       el("td", {}, r.groupe),
       el("td", {}, r.epreuve),
       el("td", {}, String(r.place)),
-      el("td", { class: "perf-cell" }, r.performance),
+      el("td", { class: "perf-cell" }, [r.performance, chronoBadge(r)]),
       el("td", {}, r.nom)
     ]));
   });
@@ -1537,10 +2061,15 @@ document.getElementById("confirmImport").addEventListener("click", () => {
       id: NEXT_ID++,
       annee: r.annee, sexe: r.sexe, club: r.club || "077108",
       groupe: r.groupe, epreuve: r.epreuve, place: String(r.place),
-      performance: r.performance, nom: r.nom, categorie: r.categorie || guessCategorie(r.epreuve)
+      performance: r.performance, nom: r.nom, categorie: r.categorie || guessCategorie(r.epreuve),
+      ...(r.anneeNaissance ? { anneeNaissance: r.anneeNaissance } : {}),
+      ...(r.chrono ? { chrono: r.chrono } : {}),
+      ...(r.date ? { date: r.date } : {}),
+      ...(r.lieu ? { lieu: r.lieu } : {})
     });
   });
   saveToStorage();
+  setLastImport(toAdd.length, [...new Set(toAdd.map(r => r.annee))].sort());
   updateSidebarCount();
   toast(`${toAdd.length} nouveaux résultats ajoutés à la base`, "success");
   setStep(3);
@@ -1606,9 +2135,307 @@ async function handleImportFile(file) {
   }
 }
 
+/* ===========================================================
+   RÉCUPÉRATION AUTOMATIQUE DEPUIS ATHLE.FR
+   Le site de la FFA bloque toute lecture directe depuis une autre page.
+   On passe donc par un "favori-bouton" (bookmarklet) exécuté SUR la page
+   athle.fr : il lit le tableau des bilans (même structure que l'export HTML)
+   et renvoie les lignes à l'application (fenêtre d'origine) par postMessage.
+   Si la fenêtre d'origine n'est plus joignable, il télécharge un .json.
+   =========================================================== */
+const FFA_CLUB_CODE = "077108";
+
+function buildFfaBilansUrl(annee) {
+  return "https://www.athle.fr/bases/liste.aspx?frmpostback=true&frmbase=bilans&frmmode=2&frmespace=0"
+    + "&frmannee=" + encodeURIComponent(annee)
+    + "&frmepreuve=&frmlicence=&frmnom=&frmprenom=&frmclub=" + FFA_CLUB_CODE + "&frmligue=&frmdepartement=";
+}
+
+/* Lecture d'une page de bilans athle.fr (document HTML déjà chargé).
+   Utilisée à la fois par le favori-bouton (exécuté sur athle.fr) et par l'import
+   d'un fichier .html enregistré. Gère :
+   - la présentation actuelle (2026) : une ligne par résultat avec les colonnes
+     Nom | Epreuve | Performance | Infos (catégorie, ex. BEF/13) | Chrono | Date | Lieu,
+     et une liste de pages (data-url) ;
+   - l'ancienne présentation : en-têtes "2026 | 100m | M" puis Place | Performance | Nom ...
+   ATTENTION : cette fonction est recopiée telle quelle dans le favori-bouton.
+   Pas de commentaire "//" à l'intérieur (le code est mis sur une seule ligne). */
+function ffaExtractFromDocument(doc, pageUrl) {
+  var clean = function (t) { return (t || "").replace(/ /g, " ").replace(/\s+/g, " ").trim(); };
+  var rows = [], pages = [], annee = null;
+  var m = String(pageUrl || "").match(/frmannee=(\d{4})/);
+  if (m) annee = parseInt(m[1], 10);
+  var mh = doc.querySelector(".mainheaders");
+  if (mh) { var ms = clean(mh.textContent).match(/Saison\s*:\s*(\d{4})/i); if (ms) annee = parseInt(ms[1], 10); }
+  [].forEach.call(doc.querySelectorAll("#optionsPagination [data-url], .select-options [data-url]"), function (o) {
+    var u = o.getAttribute("data-url");
+    if (u && /liste\.aspx/i.test(u) && pages.indexOf(u) < 0) pages.push(u);
+  });
+  var tables = doc.querySelectorAll("table");
+  for (var ti = 0; ti < tables.length; ti++) {
+    var table = tables[ti];
+    if (table.classList && table.classList.contains("detail-inner-table")) continue;
+    var trs = [].filter.call(table.querySelectorAll("tr"), function (tr) { return tr.closest("table") === table; });
+    var idx = null, H = /^(\d{4})\s*\|\s*(.+?)\s*\|\s*([MF])\s*(?:\|.*)?$/i, cur = null;
+    trs.forEach(function (tr) {
+      var cells = [].slice.call(tr.cells || []);
+      var ths = cells.filter(function (c) { return c.tagName === "TH"; });
+      if (ths.length >= 3) {
+        var names = ths.map(function (c) { return clean(c.textContent).toLowerCase(); });
+        var f = function (k) { return names.indexOf(k); };
+        if (f("nom") >= 0 && f("performance") >= 0 && (f("epreuve") >= 0 || f("épreuve") >= 0)) {
+          idx = { nom: f("nom"), epreuve: f("epreuve") >= 0 ? f("epreuve") : f("épreuve"), perf: f("performance"),
+                  infos: f("infos"), chrono: f("chrono"), date: f("date"), lieu: f("lieu") };
+        }
+        return;
+      }
+      var hd = tr.querySelector("div.headers");
+      if (hd) { var mm = clean(hd.textContent).match(H); if (mm) cur = { annee: parseInt(mm[1], 10), epreuve: mm[2].trim(), sexe: mm[3].toUpperCase() }; return; }
+      var c = cells.map(function (td) { return clean(td.textContent); });
+      if (idx && c.length > idx.perf && c[idx.nom] && c[idx.perf]) {
+        var code = idx.infos >= 0 ? c[idx.infos] : "";
+        var sx = null, mc = code.match(/^[A-Z]{2}([MF])\b/);
+        if (mc) sx = mc[1];
+        if (!sx) { var a = idx.infos >= 0 && cells[idx.infos].querySelector("a"); var ma = a && (a.getAttribute("href") || "").match(/frmsexe=([MF])/); if (ma) sx = ma[1]; }
+        rows.push({ annee: annee, sexe: sx, epreuve: c[idx.epreuve], place: "", performance: c[idx.perf], nom: c[idx.nom],
+                    codeCategorie: code, chrono: idx.chrono >= 0 ? c[idx.chrono] : "", date: idx.date >= 0 ? c[idx.date] : "",
+                    lieu: idx.lieu >= 0 ? c[idx.lieu] : "" });
+      } else if (!idx && cur && c.length >= 7 && /^(\d+|-)$/.test(c[0])) {
+        rows.push({ annee: cur.annee, sexe: cur.sexe, epreuve: cur.epreuve, place: c[0], performance: c[1], nom: c[2], codeCategorie: c[6] });
+      }
+    });
+    if (rows.length) break;
+  }
+  return { annee: annee, rows: rows, pages: pages };
+}
+
+/* Code du favori-bouton : lit la page affichée puis récupère, sur athle.fr,
+   toutes les pages de chaque année demandée (même site, donc autorisé),
+   ne garde que les sexes demandés et envoie tout à l'application.
+   Les années et sexes voulus sont transmis par le nom de l'onglet ouvert
+   par l'application : "bsga|2025,2026|F,M". */
+function ffaBookmarkletSource() {
+  return "(async function(){" +
+    "var X=" + ffaExtractFromDocument.toString() + ";" +
+    String.raw`
+if(window.__bsgaBusy){alert('Palmarès BSGA : récupération déjà en cours, patientez…');return;}
+window.__bsgaBusy=true;
+var box=document.createElement('div');
+box.style.cssText='position:fixed;z-index:2147483647;left:50%;top:20px;transform:translateX(-50%);background:#0D5E8E;color:#fff;font:600 15px/1.4 system-ui,sans-serif;padding:14px 22px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:90vw;text-align:center;';
+document.body.appendChild(box);
+var say=function(t){box.textContent='Palmarès BSGA : '+t;};
+try{
+var first=X(document,location.href);
+var parseYears=function(t){var out=[];String(t||'').split(/[,;\s]+/).forEach(function(p){var m=p.match(/^(\d{4})(?:-(\d{4}))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;if(b<a){var t2=a;a=b;b=t2;}for(var y=a;y<=b;y++)if(out.indexOf(y)<0)out.push(y);});return out.sort();};
+var cfgTxt=null,mn=String(window.name||'').match(/^bsga\|([\d,]+)\|([MF,]+)$/);
+if(mn)cfgTxt=mn[1]+'|'+mn[2];
+if(!cfgTxt){var mh=decodeURIComponent(location.hash||'').match(/bsga=([\d,]+)\|([MF,]+)/);if(mh)cfgTxt=mh[1]+'|'+mh[2];}
+if(!cfgTxt){try{var ss=sessionStorage.getItem('bsga_cfg');if(ss)cfgTxt=ss;}catch(x){}}
+var years,sexes;
+if(cfgTxt){var cp=cfgTxt.split('|');years=parseYears(cp[0]);sexes=cp[1].split(',');}
+else{
+  var ans=prompt('Palmarès BSGA — quelles années récupérer ?\n(ex. 2026, ou 2024,2026, ou 2015-2027)',String(first.annee||new Date().getFullYear()));
+  if(ans===null){say('annulé.');return;}
+  years=parseYears(ans);
+  var sx=prompt('Palmarès BSGA — quels sexes ?\nF = femmes, M = hommes, FM = les deux','FM');
+  if(sx===null){say('annulé.');return;}
+  sexes=['F','M'].filter(function(c){return String(sx).toUpperCase().indexOf(c)>=0;});
+}
+if(!years.length){years=[first.annee||new Date().getFullYear()];}
+if(!sexes.length){sexes=['F','M'];}
+try{sessionStorage.setItem('bsga_cfg',years.join(',')+'|'+sexes.join(','));}catch(x){}
+var posOf=function(u){return new URL(u,location.href).searchParams.get('frmposition')||'0';};
+var urlFor=function(y,pos){var u=new URL(location.href);u.searchParams.set('frmannee',String(y));u.searchParams.set('frmposition',String(pos));u.hash='';return u.href;};
+var load=async function(u){await new Promise(function(ok){setTimeout(ok,350);});var r=await fetch(u,{credentials:'include'});if(!r.ok)throw new Error('page inaccessible ('+r.status+')');return new DOMParser().parseFromString(await r.text(),'text/html');};
+var all=[],perYear={},nPages=0,curYear=first.annee,curPos=posOf(location.href);
+for(var yi=0;yi<years.length;yi++){
+  var y=years[yi];perYear[y]=0;
+  say('année '+y+', page 1…');
+  var ex0=(y===curYear&&curPos==='0')?first:X(await load(urlFor(y,0)),urlFor(y,0));
+  var seen={'0':1},pages=[ex0];nPages++;
+  var others=ex0.pages.filter(function(u){var p=posOf(u);if(seen[p])return false;seen[p]=1;return true;});
+  for(var pi=0;pi<others.length;pi++){
+    say('année '+y+', page '+(pi+2)+'/'+(others.length+1)+'…');
+    var pos=posOf(others[pi]);
+    pages.push((y===curYear&&pos===curPos)?first:X(await load(urlFor(y,pos)),urlFor(y,pos)));nPages++;
+  }
+  pages.forEach(function(ex){ex.rows.forEach(function(row){row.annee=y;if(sexes.indexOf(row.sexe)>=0){all.push(row);perYear[y]++;}});});
+}
+var detail=years.map(function(y){return y+' : '+perYear[y];}).join(' · ');
+var sx=sexes.length>1?'femmes et hommes':(sexes[0]==='F'?'femmes':'hommes');
+if(!all.length){say('aucun résultat trouvé.');alert('Palmarès BSGA : aucun résultat trouvé ('+sx+', '+detail+').\nVérifiez que vous êtes sur la liste des bilans du club sur athle.fr.');return;}
+var msg={type:'bsga-palmares-import',version:4,source:location.href,years:years,sexes:sexes,results:all},sent=false;
+try{if(window.opener&&!window.opener.closed){window.opener.postMessage(msg,'*');sent=true;}}catch(x){}
+var resume=all.length+' résultats '+sx+' ('+detail+', '+nPages+' page'+(nPages>1?'s':'')+')';
+if(sent){say(resume+' envoyés ✔');alert('Palmarès BSGA : '+resume+' envoyés à l\'application.\nRevenez sur l\'onglet du Palmarès pour vérifier et valider.');return;}
+var blob=new Blob([JSON.stringify(all)],{type:'application/json'}),u=URL.createObjectURL(blob),l=document.createElement('a');
+l.href=u;l.download='bsga_athle_'+years.join('-')+'.json';document.body.appendChild(l);l.click();setTimeout(function(){URL.revokeObjectURL(u);l.remove();},2000);
+say(resume+' enregistrés dans '+l.download);
+alert('Palmarès BSGA : '+resume+' enregistrés dans le fichier '+l.download+'.\nDéposez ce fichier dans la page « Importer des résultats » de l\'application.');
+}catch(err){say('erreur.');alert('Palmarès BSGA : erreur pendant la récupération ('+err.message+').');}
+finally{window.__bsgaBusy=false;setTimeout(function(){box.remove();},6000);}
+})();`;
+}
+
+function ffaBookmarkletHref() {
+  return "javascript:" + encodeURIComponent(ffaBookmarkletSource().replace(/\r?\n/g, " "));
+}
+
+// Calcule la place (classement interne au club) quand la source ne la donne pas :
+// par année + sexe + épreuve, meilleure perf de chaque athlète classée, autres perfs "-".
+function computeMissingPlaces(results) {
+  const groups = {};
+  results.forEach(r => {
+    if (r.place && r.place !== "") return;
+    const k = [r.annee, r.sexe, epKeySeparate(r)].join("|");
+    (groups[k] = groups[k] || []).push(r);
+  });
+  Object.values(groups).forEach(g => {
+    const best = new Map();
+    g.forEach(r => {
+      const p = parsePerformance(r.performance, r.epreuve);
+      const key = normStr(r.nom);
+      const ex = best.get(key);
+      if (!ex) { best.set(key, { r, p }); return; }
+      if (p && (!ex.p || (p.higherIsBetter ? p.value > ex.p.value : p.value < ex.p.value))) best.set(key, { r, p });
+    });
+    const ranked = [...best.values()].filter(x => x.p).sort((a, b) => a.p.higherIsBetter ? b.p.value - a.p.value : a.p.value - b.p.value);
+    let rank = 0, last = null, shown = 0;
+    ranked.forEach(x => { shown++; if (last === null || x.p.value !== last) { rank = shown; last = x.p.value; } x.r.place = String(rank); });
+    g.forEach(r => { if (!r.place) r.place = "-"; });
+  });
+  return results;
+}
+
+// Normalise une liste de résultats venant du bouton athle.fr ou d'un JSON collé.
+function normalizeImportedRecords(data) {
+  const list = (Array.isArray(data) ? data : []).map(r => ({
+    annee: parseInt(r.annee, 10),
+    sexe: String(r.sexe || ((String(r.codeCategorie || "").match(/^[A-Z]{2}([MF])/) || [])[1]) || "M").toUpperCase(),
+    club: r.club || FFA_CLUB_CODE,
+    groupe: r.groupe || guessGroupe(r.epreuve || ""),
+    epreuve: r.epreuve,
+    place: r.place == null ? "" : String(r.place),
+    performance: r.performance,
+    nom: r.nom,
+    categorie: r.categorie || (r.codeCategorie ? decodeCategorieFFA(r.codeCategorie) : guessCategorie(r.epreuve || "")),
+    ...((r.anneeNaissance || birthYearFromCode(r.codeCategorie, r.annee)) ? { anneeNaissance: parseInt(r.anneeNaissance, 10) || birthYearFromCode(r.codeCategorie, r.annee) } : {}),
+    ...(r.date ? { date: r.date } : {}),
+    ...(r.lieu ? { lieu: r.lieu } : {}),
+    ...(r.chrono ? { chrono: r.chrono } : {})
+  })).filter(r => r.annee && r.epreuve && r.nom && r.performance);
+  list.forEach(r => { if (r.place === "undefined" || r.place === "null") r.place = ""; });
+  return computeMissingPlaces(list);
+}
+
+function showImportPage() {
+  document.querySelectorAll(".nav-btn, .mobile-nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll('[data-page="import"]').forEach(b => b.classList.add("active"));
+  document.getElementById("page-import").classList.add("active");
+}
+
+let ffaLastRequest = null;
+
+function setupFfaAutoImport() {
+  const link = document.getElementById("ffaBookmarklet");
+  if (!link) return;
+  link.setAttribute("href", ffaBookmarkletHref());
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    toast("Faites glisser ce bouton dans la barre de favoris (ne pas cliquer ici)", "");
+  });
+
+  document.getElementById("ffaCopyBookmarklet").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const code = ffaBookmarkletHref();
+    try { await navigator.clipboard.writeText(code); toast("Code du bouton copié", "success"); }
+    catch (err) {
+      const ta = document.getElementById("pasteArea");
+      ta.value = code; ta.focus(); ta.select();
+      toast("Copie automatique impossible : le code est sélectionné dans la zone de texte, copiez-le", "error");
+    }
+  });
+
+  // Années proposées : de 2015 à l'année de la saison en cours (cases à cocher)
+  const yearsBox = document.getElementById("ffaYears");
+  const ref = getCurrentSeasonRefYear();
+  const defaultYear = Math.min(ref, new Date().getFullYear());
+  for (let y = ref; y >= 2015; y--) {
+    const cb = el("input", { type: "checkbox", value: String(y) });
+    if (y === defaultYear) cb.checked = true;
+    yearsBox.appendChild(el("label", { class: "ffa-check" }, [cb, el("span", {}, String(y))]));
+  }
+  const getChecked = (id) => [...document.querySelectorAll(`#${id} input:checked`)].map(i => i.value);
+
+  document.getElementById("ffaOpenBtn").addEventListener("click", () => {
+    const years = getChecked("ffaYears").map(Number).sort((a, b) => a - b);
+    const sexes = getChecked("ffaSexes");
+    if (!years.length) { toast("Cochez au moins une année", "error"); return; }
+    if (!sexes.length) { toast("Cochez au moins un sexe", "error"); return; }
+    // La configuration voyage dans le nom de l'onglet ET dans l'adresse (#bsga=...),
+    // car certains navigateurs effacent le nom d'onglet en changeant de site.
+    const cfg = years.join(",") + "|" + sexes.join(",");
+    ffaLastRequest = { years, sexes };
+    const w = window.open(buildFfaBilansUrl(years[years.length - 1]) + "#bsga=" + cfg, "bsga|" + cfg);
+    if (!w) toast("Le navigateur a bloqué l'ouverture : autorisez les fenêtres pop-up pour cette page", "error");
+    else {
+      const st = document.getElementById("ffaStatus");
+      st.style.display = "block";
+      st.style.background = "#EEF3F5"; st.style.color = "var(--grey)";
+      const sx = sexes.length > 1 ? "femmes et hommes" : (sexes[0] === "F" ? "femmes" : "hommes");
+      st.textContent = `En attente des résultats (${years.join(", ")} — ${sx})… cliquez sur le favori « 📥 Envoyer au Palmarès BSGA » dans l'onglet athle.fr.`;
+    }
+  });
+
+  window.addEventListener("message", (e) => {
+    const d = e.data;
+    if (!d || d.type !== "bsga-palmares-import" || !Array.isArray(d.results)) return;
+    let host = "";
+    try { host = new URL(e.origin).hostname; } catch (err) {}
+    if (!/(^|\.)athle\.fr$/i.test(host)) return; // n'accepter que les pages athle.fr
+    const results = normalizeImportedRecords(d.results);
+    showImportPage();
+    window.focus();
+    const st = document.getElementById("ffaStatus");
+    st.style.display = "block";
+    if (!results.length) {
+      st.style.background = "#FCE6DE"; st.style.color = "#9A2A0E";
+      st.textContent = "Résultats reçus, mais aucune ligne exploitable.";
+      return;
+    }
+    st.style.background = "#E6F4EA"; st.style.color = "#1E6B34";
+    const nMan = results.filter(r => getChronoType(r) === "M").length;
+    const gotYears = d.years || [...new Set(results.map(r => r.annee))].sort();
+    let txt = `${results.length} résultats reçus depuis athle.fr (${gotYears.join(", ")}), dont ${nMan} au chrono manuel — vérifiez ci-dessous puis validez l'ajout.`;
+    if (!d.version || d.version < 4) {
+      txt = "⚠️ Votre favori « Envoyer au Palmarès BSGA » est une ancienne version : supprimez-le et refaites glisser le nouveau bouton (étape 1) pour pouvoir récupérer plusieurs années. " + txt;
+      st.style.background = "#FFF4E0"; st.style.color = "#7A4F00";
+    } else if (ffaLastRequest) {
+      const missing = ffaLastRequest.years.filter(y => !gotYears.map(Number).includes(Number(y)));
+      if (missing.length) {
+        txt += ` (Années demandées mais non reçues : ${missing.join(", ")} — le favori vous a peut-être demandé les années à la main.)`;
+      }
+    }
+    st.textContent = txt;
+    setStep(1);
+    processParsedResults(results, 0);
+    const diff = document.getElementById("diffPanel");
+    if (diff) diff.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+setupFfaAutoImport();
+
 document.getElementById("parsePasteBtn").addEventListener("click", () => {
   const text = document.getElementById("pasteArea").value;
   if (!text.trim()) { toast("Collez d'abord du texte à analyser", "error"); return; }
+  // Liste JSON collée (ex. contenu d'un fichier produit par le bouton athle.fr)
+  if (/^\s*\[/.test(text)) {
+    try {
+      const results = normalizeImportedRecords(JSON.parse(text));
+      if (results.length) { processParsedResults(results, 0); return; }
+    } catch (err) { /* sinon on retombe sur l'analyse texte */ }
+  }
   const { results, errors } = parsePastedText(text);
   if (!results.length) { toast("Aucun résultat reconnu dans ce texte", "error"); return; }
   processParsedResults(results, errors.length);
@@ -1624,8 +2451,8 @@ function exportExplorerToExcel() {
   if (!rows.length) { toast("Aucune donnée à exporter avec ces filtres", "error"); return; }
   const data = rows.map(r => ({
     Année: r.annee, Sexe: r.sexe, Discipline: r.groupe, Épreuve: r.epreuve,
-    Catégorie: r.categorie || "Non déterminée",
-    Place: r._displayPlace != null ? r._displayPlace : r.place, Performance: r.performance, Athlète: r.nom
+    Catégorie: catLabel(r),
+    Place: r._displayPlace != null ? r._displayPlace : r.place, Performance: r.performance, Chrono: chronoLabel(r), Athlète: r.nom
   }));
   const ws = XLSX.utils.json_to_sheet(data);
   ws['!cols'] = [{wch:8},{wch:6},{wch:20},{wch:28},{wch:16},{wch:8},{wch:18},{wch:28}];
@@ -1643,7 +2470,7 @@ function exportExplorerToPdf() {
   doc.autoTable({
     startY: 30,
     head: [["Année","Sexe","Discipline","Épreuve","Catégorie","Place","Performance","Athlète"]],
-    body: rows.map(r => [r.annee, r.sexe, r.groupe, r.epreuve, r.categorie || "Non déterminée", r._displayPlace != null ? r._displayPlace : r.place, r.performance, r.nom]),
+    body: rows.map(r => [r.annee, r.sexe, r.groupe, r.epreuve, catLabel(r), r._displayPlace != null ? r._displayPlace : r.place, r.performance + (getChronoType(r) === "M" ? " (man.)" : ""), r.nom]),
     styles: { fontSize: 8, font: "helvetica" },
     headStyles: { fillColor: [10,51,73], textColor: [232,65,26] },
     alternateRowStyles: { fillColor: [245,245,245] }
@@ -1652,19 +2479,147 @@ function exportExplorerToPdf() {
   toast("Export PDF généré", "success");
 }
 
+// Meilleure performance (RP) de l'athlète par épreuve (chronos manuels à part).
+function athletePersonalBests(rows) {
+  const best = new Map();
+  rows.forEach(r => {
+    const p = parsePerformance(r.performance, r.epreuve);
+    if (!p) return;
+    const k = epKeySeparate(r);
+    const cur = best.get(k);
+    if (!cur || (p.higherIsBetter ? p.value > cur.p.value : p.value < cur.p.value)) best.set(k, { r, p });
+  });
+  const groupOrder = ["Sprint", "Haies / Steeple", "Demi-fond / Fond", "Marche", "Sauts", "Lancers", "Epreuves combinees", "Relais", "Autre"];
+  const order = new Map(sortEpreuves([...new Set(rows.map(r => r.epreuve))]).map((e, i) => [e, i]));
+  return [...best.values()].map(x => x.r).sort((a, b) =>
+    ((groupOrder.indexOf(a.groupe) + 1 || 99) - (groupOrder.indexOf(b.groupe) + 1 || 99)) ||
+    ((order.get(a.epreuve) ?? 999) - (order.get(b.epreuve) ?? 999)));
+}
+
+// Graphique toile d'araignée (une couleur par année) dessiné hors écran pour le PDF.
+function buildAthleteRadarImage(rows) {
+  const years = uniqueSorted(rows.map(r => r.annee));
+  const series = years.map(y => {
+    const rs = rows.filter(r => r.annee === y);
+    return { y, vals: RADAR_GROUPS.map(g => bestNiveauForGroup(rs, g.db) || 0) };
+  }).filter(s => s.vals.some(v => v > 0));
+  if (!series.length || typeof Chart === "undefined") return null;
+  const palette = ["#C3D3D8", "#9AAEB6", "#7FB3D5", "#2E86C1", "#0D5E8E", "#E8411A"];
+  const colors = series.map((_, i) => palette[Math.max(0, palette.length - series.length + i)] || palette[i % palette.length]);
+  const canvas = document.createElement("canvas");
+  canvas.width = 900; canvas.height = 760;
+  canvas.style.cssText = "position:fixed;left:-10000px;top:0;width:900px;height:760px;";
+  document.body.appendChild(canvas);
+  let img = null;
+  try {
+    const chart = new Chart(canvas.getContext("2d"), {
+      type: "radar",
+      data: {
+        labels: RADAR_GROUPS.map(g => g.label),
+        datasets: series.map((s, i) => ({
+          label: String(s.y), data: s.vals,
+          borderColor: colors[i], backgroundColor: colors[i] + (i === series.length - 1 ? "33" : "14"),
+          borderWidth: i === series.length - 1 ? 4 : 2.5, pointRadius: 4, pointBackgroundColor: colors[i]
+        }))
+      },
+      options: {
+        responsive: false, animation: false, devicePixelRatio: 2,
+        plugins: { legend: { position: "bottom", labels: { font: { size: 18 }, boxWidth: 24, padding: 18 } } },
+        scales: { r: { min: 0, max: 50, ticks: { stepSize: 10, font: { size: 14 }, backdropColor: "transparent" },
+                       pointLabels: { font: { size: 20, weight: "bold" } } } }
+      }
+    });
+    img = canvas.toDataURL("image/png", 1.0);
+    chart.destroy();
+  } catch (e) { console.error(e); }
+  canvas.remove();
+  return img ? { img, series } : null;
+}
+
 function exportAthletePdf(name) {
   const map = getAthletesAggregated();
   const rows = (map[name] || []).slice().sort((a,b) => (b.annee - a.annee) || a.epreuve.localeCompare(b.epreuve, 'fr'));
+  if (!rows.length) { toast("Aucun résultat pour cet athlète", "error"); return; }
   const doc = new jspdf.jsPDF();
-  pdfHeader(doc, name, `Fiche athlète — BSGA — ${rows.length} résultat(s)`);
+  const pageW = doc.internal.pageSize.getWidth();
+  const navy = [10, 51, 73], orange = [232, 65, 26];
+  const cat = getCurrentCategorieForAthlete(name, rows);
+  const catTxt = cat.label + (/^Master M\d+/.test(cat.label) ? " (" + masterSubRange(cat.label.slice(7)) + ")" : "");
+  pdfHeader(doc, name, `Fiche athlète — BSGA — Né·e : ${formatAthleteBirth(name, rows)} — Catégorie ${getCurrentSeasonLabel()} : ${catTxt}`);
+  const sectionTitle = (txt, y) => {
+    doc.setFontSize(12); doc.setTextColor(...navy); doc.text(txt, 14, y);
+    doc.setDrawColor(...orange); doc.setLineWidth(0.6); doc.line(14, y + 1.8, 60, y + 1.8);
+    return y + 6;
+  };
+
+  // 1) Records personnels par épreuve
+  let y = sectionTitle("Records personnels (RP) par épreuve", 36);
+  const pbs = athletePersonalBests(rows);
+  const withNiv = pbs.some(r => getNiveauFFAForRow(r)); // colonne utile seulement si l'athlète a des perfs cotées
   doc.autoTable({
-    startY: 32,
-    head: [["Année","Discipline","Épreuve","Catégorie","Place","Performance"]],
-    body: rows.map(r => [r.annee, r.groupe, r.epreuve, r.categorie || "Non déterminée", r.place, r.performance]),
-    styles: { fontSize: 9, font: "helvetica" },
-    headStyles: { fillColor: [10,51,73], textColor: [232,65,26] },
+    startY: y,
+    head: [["Discipline", "Épreuve", "RP", "Année", "Catégorie", "Date · Lieu", ...(withNiv ? ["Niv. FFA"] : [])]],
+    body: pbs.map(r => [r.groupe, r.epreuve, r.performance + (getChronoType(r) === "M" ? " (man.)" : ""), r.annee, catLabel(r),
+      [r.date, r.lieu].filter(Boolean).join(" · ") || "-", ...(withNiv ? [getNiveauFFAForRow(r) || "-"] : [])]),
+    styles: { fontSize: 8.5, font: "helvetica", cellPadding: 1.6 },
+    headStyles: { fillColor: navy, textColor: orange },
+    columnStyles: { 2: { fontStyle: "bold" }, 6: { halign: "center" } },
     alternateRowStyles: { fillColor: [245,245,245] }
   });
+
+  // 2) Synthèse + évolution des niveaux FFA (toile d'araignée par année)
+  doc.addPage();
+  y = sectionTitle("Synthèse", 18);
+  const years = uniqueSorted(rows.map(r => r.annee));
+  const podiums = rows.filter(r => ["1","2","3"].includes(String(r.place))).length;
+  const groupes = uniqueSorted(rows.map(r => r.groupe));
+  const niveaux = rows.map(getNiveauFFAForRow).filter(Boolean);
+  const lines = [
+    `Résultats : ${rows.length}   ·   Podiums (top 3 club) : ${podiums}   ·   Disciplines : ${groupes.length}`,
+    `Saisons : ${years.join(", ")}`,
+    `Épreuves pratiquées : ${uniqueSorted(rows.map(r => r.epreuve)).length}   ·   Records personnels : ${pbs.length}`,
+    niveaux.length ? `Niveau FFA moyen : ${(niveaux.reduce((a, b) => a + b, 0) / niveaux.length).toFixed(1)}/50 (${niveaux.length} résultats cotés)` : "Niveau FFA : non applicable (tables de cotation benjamins et minimes uniquement)"
+  ];
+  doc.setFontSize(10); doc.setTextColor(40);
+  lines.forEach(t => { doc.text(t, 14, y); y += 6; });
+
+  y = sectionTitle("Évolution des niveaux FFA par année", y + 4);
+  const radar = buildAthleteRadarImage(rows);
+  if (radar) {
+    const w = 150, h = w * 760 / 900;
+    doc.addImage(radar.img, "PNG", (pageW - w) / 2, y, w, h);
+    y += h + 4;
+    doc.autoTable({
+      startY: y,
+      head: [["Année", ...RADAR_GROUPS.map(g => g.label)]],
+      body: radar.series.map(s => [s.y, ...s.vals.map(v => v || "-")]),
+      styles: { fontSize: 8.5, font: "helvetica", halign: "center", cellPadding: 1.4 },
+      headStyles: { fillColor: navy, textColor: orange },
+      alternateRowStyles: { fillColor: [245,245,245] }
+    });
+  } else {
+    doc.setFontSize(9.5); doc.setTextColor(120);
+    doc.text("Aucun résultat coté : les tables de cotation FFA concernent les benjamins et les minimes.", 14, y + 2);
+  }
+
+  // 3) Liste complète des résultats
+  doc.addPage();
+  y = sectionTitle(`Tous les résultats (${rows.length})`, 18);
+  doc.autoTable({
+    startY: y,
+    head: [["Année","Discipline","Épreuve","Catégorie","Place","Performance"]],
+    body: rows.map(r => [r.annee, r.groupe, r.epreuve, catLabel(r), r.place, r.performance]),
+    styles: { fontSize: 9, font: "helvetica" },
+    headStyles: { fillColor: navy, textColor: orange },
+    alternateRowStyles: { fillColor: [245,245,245] }
+  });
+
+  // Pied de page : numéros de page
+  const n = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150);
+    doc.text(`BSGA Palmarès — ${name} — page ${i}/${n}`, pageW / 2, doc.internal.pageSize.getHeight() - 6, { align: "center" });
+  }
   doc.save(`Fiche_${name.replace(/\s+/g,"_")}_${dateStamp()}.pdf`);
   toast("Fiche athlète exportée en PDF", "success");
 }
@@ -1748,7 +2703,14 @@ function renderSettings() {
     ["Résultats totaux", nbResultats, ""],
     ["Athlètes", nbAthletes, ""],
     ["Saisons couvertes", years.length, years.join(", ")],
-    ["Épreuves distinctes", nbEpreuves, ""]
+    ["Épreuves distinctes", nbEpreuves, ""],
+    ["Dernier import", formatImportDate(getLastImport(), false), (() => {
+      const i = getLastImport(); const latest = getLatestResultDate();
+      const parts = [];
+      if (i && i.count) parts.push(`${i.count} résultats` + (i.years && i.years.length ? ` (${i.years.length > 3 ? i.years[0] + "–" + i.years[i.years.length-1] : i.years.join(", ")})` : ""));
+      if (latest) parts.push(`perf. la plus récente : ${latest}`);
+      return parts.join(" · ");
+    })()]
   ].forEach(([label, val, foot]) => {
     row.appendChild(el("div", { class: "kpi-card" }, [
       el("div", { class: "kpi-label" }, label),
@@ -1769,6 +2731,25 @@ document.getElementById("exportJsonBtn").addEventListener("click", () => {
   a.click();
   URL.revokeObjectURL(url);
   toast("Fichier donnees.json téléchargé", "success");
+});
+
+document.getElementById("publishDataJsBtn").addEventListener("click", () => {
+  const out = buildDataJsForPublication();
+  const blob = new Blob([out.content], { type: "text/javascript;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "data.js";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+  const info = document.getElementById("publishInfo");
+  if (info) {
+    info.style.display = "block";
+    const bd = out.birthdates > 1 ? `${out.birthdates} dates de naissance` : `${out.birthdates} date de naissance`;
+    info.textContent = `data.js généré : ${out.count} résultats et ${bd} (version ${out.version.replace("T", " à ")}). Déposez-le maintenant sur GitHub à la place de l'ancien.`;
+  }
+  toast("Fichier data.js téléchargé", "success");
 });
 
 document.getElementById("loadJsonBtn").addEventListener("click", () => {
@@ -1832,6 +2813,14 @@ function init() {
     console.error("Erreur au rendu du tableau de bord :", e);
   }
 
+  if (SEED_MERGE_REPORT && (SEED_MERGE_REPORT.added || SEED_MERGE_REPORT.birthdates)) {
+    const parts = [];
+    const n = SEED_MERGE_REPORT.added, b = SEED_MERGE_REPORT.birthdates;
+    if (n) parts.push(n > 1 ? `${n} nouveaux résultats` : "1 nouveau résultat");
+    if (b) parts.push(b > 1 ? `${b} dates de naissance` : "1 date de naissance");
+    toast("Base en ligne mise à jour : " + parts.join(" et ") + (n + b > 1 ? " ajoutés" : " ajouté"), "success");
+  }
+
   // Enregistrement du Service Worker pour le mode PWA (hors-ligne)
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -1855,7 +2844,73 @@ function saveCotationTable(catCode, table) {
 }
 // Renvoie la table personnalisée (localStorage) si elle existe, sinon la table intégrée
 // par défaut (COTATION_DEFAULTS), sinon null.
+/* ── Barème World Athletics : points = a·x² + b·x + c (x en s ou en m) ── */
+function isWaCat(code) { return code === "WAM" || code === "WAF"; }
+function waCoef(code, waEvent) {
+  if (typeof WA_COEFFS === "undefined") return null;
+  const g = WA_COEFFS[code === "WAF" ? "women" : "men"];
+  return g ? g[waEvent] || null : null;
+}
+// Valeur codée de la table → x (secondes ou mètres)
+function waX(v, fmt) {
+  if (fmt === "SSCC") return v / 100;
+  if (fmt === "MMSSCC") return Math.floor(v / 10000) * 60 + (v % 10000) / 100;
+  if (fmt === "HMMSS") return Math.floor(v / 10000) * 3600 + Math.floor((v % 10000) / 100) * 60 + (v % 100);
+  if (fmt === "CM") return v / 100;
+  return null;
+}
+// x → valeur codée ; un temps est arrondi vers le bas, une distance vers le haut
+// (la marque affichée suffit pour obtenir les points du palier)
+function waEncode(x, fmt) {
+  if (fmt === "SSCC") return Math.floor(x * 100 + 1e-6);
+  if (fmt === "MMSSCC") { const h = Math.floor(x * 100 + 1e-6); return Math.floor(h / 6000) * 10000 + (h % 6000); }
+  if (fmt === "HMMSS") { const t = Math.floor(x + 1e-6); return Math.floor(t / 3600) * 10000 + Math.floor((t % 3600) / 60) * 100 + (t % 60); }
+  if (fmt === "CM") return Math.ceil(x * 100 - 1e-6);
+  return null;
+}
+function waPoints(x, coef) {
+  if (!coef || x === null || !(x > 0)) return 0;
+  const [a, b, c, lowerBetter] = coef;
+  const vertex = -b / (2 * a);
+  if (lowerBetter ? x >= vertex : x <= vertex) return 0;
+  return Math.max(0, Math.min(1400, Math.floor(a * x * x + b * x + c + 1e-9)));
+}
+function waMarkFor(points, coef) {
+  const [a, b, c, lowerBetter] = coef;
+  const disc = b * b - 4 * a * (c - points);
+  if (disc < 0) return null;
+  const roots = [(-b - Math.sqrt(disc)) / (2 * a), (-b + Math.sqrt(disc)) / (2 * a)];
+  const ok = roots.filter(x => x > 0 && (lowerBetter ? 2 * a * x + b < 0 : 2 * a * x + b > 0));
+  return ok.length ? ok[0] : null;
+}
+const WA_STEP = 50;
+const _waTables = {};
+function buildWaTable(code) {
+  if (_waTables[code]) return _waTables[code];
+  const rows = [];
+  for (let P = WA_STEP; P <= 1400; P += WA_STEP) {
+    const row = { niveau: P, pts: P };
+    WA_EVENTS.forEach(e => {
+      if (!(code === "WAF" ? e.f : e.m)) return;
+      const coef = waCoef(code, e.wa);
+      if (!coef) return;
+      const x = waMarkFor(P, coef);
+      if (x !== null) row[e.key] = waEncode(x, e.fmt);
+    });
+    rows.push(row);
+  }
+  _waTables[code] = rows;
+  return rows;
+}
+function waPointsForValue(code, colKey, val) {
+  const col = COTATION_COLS.find(c => c.key === colKey);
+  if (!col || !col.wa) return 0;
+  return waPoints(waX(val, col.fmt), waCoef(code, col.wa));
+}
+function waColor(points) { return points > 0 ? lvlColorCotation(Math.max(1, Math.round(points / 1400 * 50))) : "#9AAEB6"; }
+
 function loadCotationTable(catCode) {
+  if (isWaCat(catCode)) return buildWaTable(catCode);
   try {
     const raw = localStorage.getItem(COTATION_STORAGE_PREFIX + catCode);
     if (raw) return JSON.parse(raw);
@@ -1910,7 +2965,7 @@ function perfToTableValue(perfStr, colKey) {
   if (!col) return null;
   const s = perfStr.replace(/\s*\([^)]*\)/g, "").trim();
   if (col.fmt === "CM") {
-    const m = s.match(/^(\d+)m(\d+)?/);
+    const m = s.match(/^(\d+)m(\d+)?/i);
     if (m) return parseInt(m[1]) * 100 + parseInt(m[2] || "0");
     return null;
   }
@@ -1955,7 +3010,7 @@ function getNiveauFFAForRow(r) {
   if (!catCode || !NIVEAU_FFA_EXPLORER_CATS.includes(catCode)) return null;
   const table = loadCotationTable(catCode);
   if (!table) return null;
-  const colKey = COTATION_EPREUVE_MAP[r.epreuve];
+  const colKey = cotationColFor(r.epreuve);
   if (!colKey) return null;
   return getNiveauCotation(r.performance, colKey, table);
 }
@@ -1978,6 +3033,602 @@ function updateExplorerNiveauMoyen(rows) {
   badge.style.background = lvlColorCotation(Math.round(parseFloat(avg)));
   countEl.textContent = `(sur ${niveaux.length} résultat${niveaux.length > 1 ? "s" : ""} coté${niveaux.length > 1 ? "s" : ""})`;
   wrap.style.display = "inline-flex";
+}
+
+/* ===========================================================
+   PAGE « TABLES DE COTATION »
+   Affiche les tables BEM / BEF / MIM / MIF et situe une performance saisie.
+   Encodage des tables : SSCC = secondes*100 + centièmes (7"45 → 745),
+   MMSSCC = min*10000 + s*100 + centièmes (3'15"90 → 31590), CM = centimètres.
+   =========================================================== */
+const COT_PAGE_CATS = ["BEM", "BEF", "MIM", "MIF", "WAM", "WAF"];
+
+// Nom réel de l'épreuve selon la catégorie : une même colonne de table correspond à
+// des engins / hauteurs de haies différents (ex. colonne « Poids 3kg » = poids de
+// 2 kg chez les benjamines). Vérifié sur les résultats du club importés d'athle.fr.
+const COT_COL_LABELS_BY_CAT = {
+  BEM: { "50mHaies": "50m haies (65)", Poids3kg: "Poids 3kg", Disque1kg: "Disque 1kg", Marteau3kg: "Marteau 3kg", Javelot500g: "Javelot 500g", "2000mMarche": "2000m marche" },
+  BEF: { "50mHaies": "50m haies (65)", Poids3kg: "Poids 2kg", Disque1kg: "Disque 0.6kg", Marteau3kg: "Marteau 2kg", Javelot500g: "Javelot 400g", "2000mMarche": "2000m marche" },
+  MIM: { "50mHaies84": "50m haies (84)", "80mHaies84": "80m haies (84)", "100mHaies84": "100m haies (84)", "200mHaies76": "200m haies (76)", Poids4kg: "Poids 4kg", Disque1_25kg: "Disque 1.2kg", Marteau4kg: "Marteau 4kg", Javelot600g: "Javelot 600g", "3000mMarche": "3000m marche" },
+  MIF: { "50mHaies76": "50m haies (76)", "80mHaies76": "80m haies (76)", "200mHaies76": "200m haies (76)", Poids3kg: "Poids 3kg", Disque0_8kg: "Disque 0.8kg", Marteau3kg: "Marteau 3kg", Javelot500g: "Javelot 500g", "3000mMarche": "3000m marche" }
+};
+function cotColLabel(colKey, cat) {
+  if (isWaCat(cat)) {
+    const e = WA_EVENTS.find(x => x.key === colKey);
+    if (e) return (cat === "WAF" ? e.f : e.m) || e.m || e.f;
+  }
+  const byCat = COT_COL_LABELS_BY_CAT[cat] || {};
+  if (byCat[colKey]) return byCat[colKey];
+  const col = COTATION_COLS.find(c => c.key === colKey);
+  return col ? col.label : colKey;
+}
+const COT_PAGE_LABELS = { BEM: "Benjamin", BEF: "Benjamine", MIM: "Minime garçon", MIF: "Minime fille",
+  WAM: "Hommes (cadets → masters)", WAF: "Femmes (cadettes → masters)" };
+const COT_PREF_KEY = "bsga_cotation_page";
+let cotState = { cat: "BEM", col: "50m", perf: "" };
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+function formatCotValue(v, fmt) {
+  if (v === null || v === undefined || v === "") return "";
+  v = Number(v);
+  if (fmt === "CM") return `${Math.floor(v / 100)}m${pad2(v % 100)}`;
+  if (fmt === "SSCC") return `${Math.floor(v / 100)}"${pad2(v % 100)}`;
+  if (fmt === "MMSSCC") return `${Math.floor(v / 10000)}'${pad2(Math.floor((v % 10000) / 100))}"${pad2(v % 100)}`;
+  if (fmt === "HMMSS") {
+    const h = Math.floor(v / 10000), m = Math.floor((v % 10000) / 100), sec = v % 100;
+    return h ? `${h}h${pad2(m)}'${pad2(sec)}"` : `${m}'${pad2(sec)}"`;
+  }
+  return String(v);
+}
+// Valeur → unité linéaire (centièmes ou cm) pour calculer des écarts
+function cotUnits(v, fmt) {
+  if (fmt === "MMSSCC") return Math.floor(v / 10000) * 6000 + (v % 10000);
+  if (fmt === "HMMSS") return (Math.floor(v / 10000) * 3600 + Math.floor((v % 10000) / 100) * 60 + (v % 100)) * 100;
+  return v;
+}
+function formatCotGap(units, fmt) {
+  units = Math.abs(units);
+  if (fmt === "CM") return units >= 100 ? `${Math.floor(units / 100)}m${pad2(units % 100)}` : `${units} cm`;
+  const sec = Math.floor(units / 100), cc = units % 100;
+  if (sec >= 60) return `${Math.floor(sec / 60)}'${pad2(sec % 60)}"${pad2(cc)}`;
+  return `${sec}"${pad2(cc)}`;
+}
+// Centièmes ou centimètres saisis : "5" → 50, "45" → 45
+function cotFrac(t) { return t ? parseInt((t + "0").slice(0, 2), 10) : 0; }
+
+// Lit une performance saisie librement et la convertit dans l'encodage de la table.
+function parseUserPerf(str, fmt) {
+  let s = String(str || "").trim().toLowerCase()
+    .replace(/,/g, ".").replace(/[″“”]/g, '"').replace(/[’‘´`]/g, "'").replace(/''/g, '"')
+    .replace(/\s+/g, "").replace(/\(.*?\)/g, "");
+  if (!s) return null;
+  let m;
+  if (fmt === "HMMSS") {
+    let h = 0, mi = 0, se = 0;
+    if ((m = s.match(/^(\d+)h(\d{1,2})(?:['m:"](\d{1,2}))?"?$/))) { h = +m[1]; mi = +m[2]; se = +(m[3] || 0); }
+    else if ((m = s.match(/^(\d+):(\d{1,2}):(\d{1,2})$/))) { h = +m[1]; mi = +m[2]; se = +m[3]; }
+    else if ((m = s.match(/^(\d+)['m:](\d{1,2})"?$/))) { mi = +m[1]; se = +m[2]; }
+    else return null;
+    if (se >= 60) return null;
+    const t = h * 3600 + mi * 60 + se;
+    return Math.floor(t / 3600) * 10000 + Math.floor((t % 3600) / 60) * 100 + (t % 60);
+  }
+  if (fmt === "CM") {
+    if ((m = s.match(/^(\d+)m(\d{0,2})$/))) return parseInt(m[1], 10) * 100 + cotFrac(m[2]);
+    if ((m = s.match(/^(\d+)\.(\d{1,2})m?$/))) return parseInt(m[1], 10) * 100 + cotFrac(m[2]);
+    if ((m = s.match(/^(\d+)(cm)?$/))) {
+      const n = parseInt(m[1], 10);
+      return (m[2] || n >= 100) ? n : n * 100;
+    }
+    return null;
+  }
+  // temps : minutes éventuelles, secondes, centièmes
+  let min = 0, sec = null, cc = 0;
+  if ((m = s.match(/^(\d+)[':h](\d{1,2})(?:[".:](\d{1,2}))?"?$/))) { min = +m[1]; sec = +m[2]; cc = cotFrac(m[3]); }
+  else if ((m = s.match(/^(\d+)(?:[".](\d{1,2}))?"?$/))) { sec = +m[1]; cc = cotFrac(m[2]); }
+  if (sec === null) return null;
+  if (min > 0 && sec >= 60) return null;
+  const totalSec = min * 60 + sec;
+  if (fmt === "SSCC") return totalSec * 100 + cc;
+  if (fmt === "MMSSCC") return Math.floor(totalSec / 60) * 10000 + (totalSec % 60) * 100 + cc;
+  return null;
+}
+
+function niveauFromValue(val, colKey, table) {
+  const col = COTATION_COLS.find(c => c.key === colKey);
+  if (!col || val === null || !table) return null;
+  let best = null;
+  for (const row of table) {
+    const vt = row[colKey];
+    if (vt === null || vt === undefined) continue;
+    if (col.sens === "vitesse" && val <= vt) best = row.niveau;
+    if (col.sens === "distance" && val >= vt) best = row.niveau;
+  }
+  return best;
+}
+// Repère les colonnes incohérentes d'une table : un niveau supérieur doit toujours
+// demander une performance égale ou meilleure (signe d'une table mal lue / décalée).
+function cotTableAnomalies(table) {
+  if (!table || !table.length) return [];
+  const out = [];
+  const sorted = [...table].sort((a, b) => a.niveau - b.niveau);
+  COTATION_COLS.forEach(col => {
+    if (col.key === "pts" || !col.sens) return;
+    let prev = null, bad = [];
+    sorted.forEach(r => {
+      const v = r[col.key];
+      if (v === null || v === undefined) return;
+      if (prev !== null && (col.sens === "vitesse" ? v > prev.v : v < prev.v)) bad.push(r.niveau);
+      prev = { v, n: r.niveau };
+    });
+    if (bad.length) out.push({ col: cotColLabel(col.key, cotState.cat), niveaux: bad });
+  });
+  return out;
+}
+
+function cotColumnsOf(table) {
+  return COTATION_COLS.filter(c => c.key !== "pts" && table.some(r => r[c.key] !== null && r[c.key] !== undefined));
+}
+function cotThreshold(table, colKey, niveau) {
+  const row = table.find(r => r.niveau === niveau);
+  return row && row[colKey] != null ? row[colKey] : null;
+}
+const COT_FORMAT_HINT = {
+  SSCC: 'ex. 7"45 · 7.45 · 7,45 · 7"4 (manuel)',
+  MMSSCC: "ex. 3'15\"90 · 3'15 · 3:15.9",
+  CM: "ex. 4m52 · 4.52 · 452 (cm)",
+  HMMSS: "ex. 41'05 · 1h52'08 · 1:52:08"
+};
+
+function loadCotPrefs() {
+  try { const p = JSON.parse(localStorage.getItem(COT_PREF_KEY) || "null"); if (p) cotState = { ...cotState, ...p, perf: "" }; } catch (e) {}
+}
+function saveCotPrefs() {
+  try { localStorage.setItem(COT_PREF_KEY, JSON.stringify({ cat: cotState.cat, col: cotState.col })); } catch (e) {}
+}
+
+/* ---------- Saisie de la performance en cases séparées ----------
+   Sur téléphone, le clavier numérique n'a ni ' ni " : on saisit donc minutes,
+   secondes et centièmes (ou mètres et centimètres) dans des cases distinctes,
+   les symboles étant affichés entre les cases. */
+const COT_PERF_FIELDS = {
+  SSCC:   [{ k: "s", label: "sec", ph: "7", max: 2, sep: '"' }, { k: "c", label: "1/100", ph: "45", max: 2, sep: "" }],
+  MMSSCC: [{ k: "m", label: "min", ph: "3", max: 2, sep: "'" }, { k: "s", label: "sec", ph: "15", max: 2, sep: '"' }, { k: "c", label: "1/100", ph: "90", max: 2, sep: "" }],
+  CM:     [{ k: "m", label: "m", ph: "4", max: 2, sep: "m" }, { k: "c", label: "cm", ph: "52", max: 2, sep: "" }],
+  HMMSS:  [{ k: "h", label: "h", ph: "0", max: 1, sep: "h" }, { k: "m", label: "min", ph: "41", max: 2, sep: "'" }, { k: "s", label: "sec", ph: "05", max: 2, sep: '"' }]
+};
+const COT_PERF_HELP = {
+  SSCC: 'Tapez les chiffres à la suite, sans symbole : 7 4 5 → 7"45. La case suivante est choisie automatiquement. Chrono manuel 7"4 : tapez 7 4.',
+  MMSSCC: "Tapez les chiffres à la suite, sans symbole : 3 1 5 9 0 → 3'15\"90. La case suivante est choisie automatiquement.",
+  CM: "Tapez les chiffres à la suite, sans symbole : 4 5 2 → 4m52. La case suivante est choisie automatiquement.",
+  HMMSS: "Heures, minutes puis secondes, à la suite : 0 4 1 0 5 → 41'05\" ; 1 5 2 0 8 → 1h52'08\"."
+};
+
+// Valeur maximale plausible d'une case pour l'épreuve choisie (d'après la table, +50 %).
+// Sert à passer automatiquement à la case suivante : au 50m, après « 7 » aucun temps
+// de 70 s n'est possible, donc « 7 4 5 » tapé d'affilée donne bien 7"45.
+function cotFieldLimit(k) {
+  const col = COTATION_COLS.find(c => c.key === cotState.col);
+  const table = loadCotationTable(cotState.cat);
+  if (!col || !table) return 99;
+  const vals = table.map(r => r[col.key]).filter(v => v !== null && v !== undefined);
+  if (!vals.length) return 99;
+  const maxV = Math.max(...vals);
+  if (col.fmt === "SSCC" && k === "s") return Math.ceil(maxV / 100 * 1.5);
+  if (col.fmt === "MMSSCC" && k === "m") return Math.ceil(cotUnits(maxV, "MMSSCC") / 100 * 1.5 / 60);
+  if (col.fmt === "MMSSCC" && k === "s") return 59;
+  if (col.fmt === "CM" && k === "m") return Math.ceil(maxV / 100 * 1.5);
+  if (col.fmt === "HMMSS" && k === "h") return 9;
+  if (col.fmt === "HMMSS" && (k === "m" || k === "s")) return 59;
+  return 99;
+}
+
+function cotPerfInputs() { return [...document.querySelectorAll("#cotPerfFields input")]; }
+function clearCotPerfFields() { cotPerfInputs().forEach(i => { i.value = ""; }); }
+
+// Construit la performance au format athle.fr à partir des cases (ex. 3'15"90)
+function composeCotPerf(fmt) {
+  const v = {};
+  cotPerfInputs().forEach(i => { v[i.dataset.k] = i.value.trim(); });
+  if (!Object.values(v).some(x => x)) return "";
+  if (fmt === "SSCC") return `${v.s || 0}"${v.c || ""}`;
+  if (fmt === "MMSSCC") return `${v.m || 0}'${v.s || 0}"${v.c || ""}`;
+  if (fmt === "CM") return `${v.m || 0}m${v.c || ""}`;
+  if (fmt === "HMMSS") return `${v.h || 0}h${pad2(v.m || 0)}'${pad2(v.s || 0)}"`;
+  return "";
+}
+// Remplit les cases à partir d'une valeur de table (utile si l'on colle "7"45")
+function fillCotPerfFromValue(val, fmt) {
+  const ins = {}; cotPerfInputs().forEach(i => { ins[i.dataset.k] = i; });
+  if (fmt === "CM") { ins.m.value = Math.floor(val / 100); ins.c.value = pad2(val % 100); }
+  if (fmt === "SSCC") { ins.s.value = Math.floor(val / 100); ins.c.value = pad2(val % 100); }
+  if (fmt === "MMSSCC") { ins.m.value = Math.floor(val / 10000); ins.s.value = pad2(Math.floor((val % 10000) / 100)); ins.c.value = pad2(val % 100); }
+  if (fmt === "HMMSS") { ins.h.value = Math.floor(val / 10000); ins.m.value = pad2(Math.floor((val % 10000) / 100)); ins.s.value = pad2(val % 100); }
+}
+
+function onCotPerfChange() {
+  const col = COTATION_COLS.find(c => c.key === cotState.col);
+  cotState.perf = col ? composeCotPerf(col.fmt) : "";
+  updateCotResult();
+  highlightCotTable(true);
+}
+
+function renderCotPerfFields(fmt) {
+  const box = document.getElementById("cotPerfFields");
+  if (!box || box.dataset.fmt === fmt) return;
+  const keep = box.dataset.fmt ? null : cotState.perf; // première construction
+  box.dataset.fmt = fmt;
+  box.innerHTML = "";
+  const spec = COT_PERF_FIELDS[fmt];
+  spec.forEach((f, idx) => {
+    const inp = el("input", {
+      type: "text", inputmode: idx < spec.length - 1 ? "decimal" : "numeric", maxlength: String(f.max + 1),
+      autocomplete: "off", "data-k": f.k, placeholder: f.ph, "aria-label": f.label,
+      class: "cot-pf-input" + (f.k === "c" ? " is-frac" : "")
+    });
+    inp.addEventListener("input", () => {
+      const raw = inp.value;
+      // Valeur collée complète (ex. 7"45, 3'15"90, 4m52) : on la répartit dans les cases
+      if (/[^0-9]/.test(raw)) {
+        const v = parseUserPerf(raw, fmt);
+        if (v !== null && /[^0-9.,]/.test(raw)) { fillCotPerfFromValue(v, fmt); onCotPerfChange(); return; }
+        // séparateur tapé (virgule, point, espace…) : on passe à la case suivante
+        inp.value = raw.replace(/[^0-9]/g, "");
+        const next = cotPerfInputs()[idx + 1];
+        if (next) { next.focus(); next.select(); }
+        onCotPerfChange();
+        return;
+      }
+      if (raw.length > f.max) inp.value = raw.slice(0, f.max);
+      const full = inp.value.length >= f.max;
+      const noMoreDigit = inp.value.length > 0 && Number(inp.value) * 10 > cotFieldLimit(f.k);
+      if ((full || noMoreDigit) && idx < spec.length - 1) {
+        const next = cotPerfInputs()[idx + 1];
+        if (next) { next.focus(); next.select(); }
+      }
+      onCotPerfChange();
+    });
+    inp.addEventListener("keydown", (e) => {
+      // Retour arrière dans une case vide : on revient à la case précédente
+      if (e.key === "Backspace" && !inp.value && idx > 0) {
+        const prev = cotPerfInputs()[idx - 1];
+        if (prev) { e.preventDefault(); prev.focus(); }
+      }
+    });
+    inp.addEventListener("focus", () => inp.select());
+    box.appendChild(el("span", { class: "cot-pf-cell" }, [inp, el("span", { class: "cot-pf-label" }, f.label)]));
+    if (f.sep) box.appendChild(el("span", { class: "cot-pf-sep", "aria-hidden": "true" }, f.sep));
+  });
+  const help = document.getElementById("cotPerfHelp");
+  if (help) help.textContent = COT_PERF_HELP[fmt];
+  if (keep) { const v = parseUserPerf(keep, fmt); if (v !== null) fillCotPerfFromValue(v, fmt); }
+  cotState.perf = composeCotPerf(fmt);
+}
+
+// Clic sur une valeur de la table : l'épreuve et la performance sont reportées dans
+// « Situer une performance » (le seuil exact de ce niveau), puis le résultat est affiché.
+function pickCotCell(colKey, niveau) {
+  const table = loadCotationTable(cotState.cat);
+  const col = COTATION_COLS.find(c => c.key === colKey);
+  if (!table || !col) return;
+  const v = cotThreshold(table, colKey, niveau);
+  if (v === null || v === undefined) return;
+  if (colKey !== cotState.col) setCotCol(colKey);
+  renderCotPerfFields(col.fmt);
+  fillCotPerfFromValue(v, col.fmt);
+  onCotPerfChange();
+  const panel = document.getElementById("cotResult");
+  if (panel) {
+    const r = panel.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) {
+      panel.closest(".panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+}
+
+// Change de table (catégorie) : tout est recalculé avec la nouvelle table.
+function setCotCat(code) {
+  if (!COT_PAGE_CATS.includes(code)) return;
+  const prevLabel = cotColLabel(cotState.col, cotState.cat);
+  const prevFmt = (COTATION_COLS.find(c => c.key === cotState.col) || {}).fmt;
+  cotState.cat = code;
+  const t = loadCotationTable(code);
+  if (t && !cotColumnsOf(t).some(c => c.key === cotState.col)) {
+    const same = cotColumnsOf(t).find(c => cotColLabel(c.key, code).toLowerCase() === String(prevLabel).toLowerCase())
+      || cotColumnsOf(t).find(c => cotColLabel(c.key, code).toLowerCase().split(" ")[0] === String(prevLabel).toLowerCase().split(" ")[0]);
+    if (same) {
+      if (same.fmt !== prevFmt) { cotState.perf = ""; clearCotPerfFields(); }
+      cotState.col = same.key;
+    }
+  }
+  saveCotPrefs();
+  renderCotationPage();
+}
+
+// Change d'épreuve ; la performance saisie est effacée si l'unité change (temps ↔ distance).
+function setCotCol(key) {
+  const fmtOf = k => (COTATION_COLS.find(c => c.key === k) || {}).fmt;
+  if (fmtOf(key) !== fmtOf(cotState.col)) {
+    cotState.perf = "";
+    clearCotPerfFields();
+  }
+  cotState.col = key;
+  saveCotPrefs();
+  renderCotationPage();
+}
+
+let cotInitDone = false;
+function renderCotationPage() {
+  if (!cotInitDone) {
+    cotInitDone = true;
+    loadCotPrefs();
+    // Vrais boutons (et non des boutons radio cachés) : le clic est pris en compte
+    // de la même façon dans tous les navigateurs, y compris Safari sur iPhone.
+    const chips = document.getElementById("cotCats");
+    chips.setAttribute("role", "radiogroup");
+    chips.setAttribute("aria-label", "Table de cotation");
+    COT_PAGE_CATS.forEach(code => {
+      if (code === "BEM") chips.appendChild(el("span", { class: "cot-chip-group" }, "FFA · niveaux 1 à 50"));
+      if (code === "WAM") chips.appendChild(el("span", { class: "cot-chip-group" }, "World Athletics · points 0 à 1400"));
+      const btn = el("button", { type: "button", class: "cot-chip", role: "radio", "data-cat": code }, COT_PAGE_LABELS[code]);
+      btn.addEventListener("click", () => setCotCat(code));
+      btn.addEventListener("keydown", (e) => {
+        const i = COT_PAGE_CATS.indexOf(code);
+        let j = null;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") j = (i + 1) % COT_PAGE_CATS.length;
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") j = (i + COT_PAGE_CATS.length - 1) % COT_PAGE_CATS.length;
+        if (j === null) return;
+        e.preventDefault();
+        setCotCat(COT_PAGE_CATS[j]);
+        const next = chips.querySelector(`[data-cat="${COT_PAGE_CATS[j]}"]`);
+        if (next) next.focus();
+      });
+      chips.appendChild(btn);
+    });
+    document.getElementById("cotEpreuve").addEventListener("change", (e) => setCotCol(e.target.value));
+    document.getElementById("cotTableWrap").addEventListener("click", (e) => {
+      const td = e.target.closest("td");
+      const tr = td && td.closest("tr[data-niv]");
+      if (!tr) return;
+      // clic sur la colonne Niveau : on garde l'épreuve choisie
+      pickCotCell(td.dataset.col || cotState.col, parseInt(tr.dataset.niv, 10));
+    });
+
+  }
+  // État visuel des boutons de catégorie
+  document.querySelectorAll("#cotCats .cot-chip").forEach(b => {
+    const on = b.dataset.cat === cotState.cat;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-checked", on ? "true" : "false");
+    b.tabIndex = on ? 0 : -1;
+  });
+  const table = loadCotationTable(cotState.cat);
+  const cols = table ? cotColumnsOf(table) : [];
+  if (!cols.find(c => c.key === cotState.col)) cotState.col = cols.length ? cols[0].key : "";
+  const sel = document.getElementById("cotEpreuve");
+  sel.innerHTML = "";
+  cols.forEach(c => sel.appendChild(el("option", { value: c.key }, cotColLabel(c.key, cotState.cat))));
+  sel.value = cotState.col;
+  const col = cols.find(c => c.key === cotState.col);
+  if (col) renderCotPerfFields(col.fmt);
+  document.getElementById("cotTableTitle").textContent = "Table de cotation — " + COT_PAGE_LABELS[cotState.cat] +
+    (isWaCat(cotState.cat) ? " · points World Athletics" : "");
+  document.getElementById("cotTableSource").textContent = isWaCat(cotState.cat)
+    ? "Barème World Athletics 2025 (calculé, ±1 point) · paliers de 50 points"
+    : hasCustomCotationTable(cotState.cat) ? "Table personnalisée importée (page Base de données)" : "Table FFA intégrée";
+  renderCotWarning(table);
+  renderCotTable(table, cols);
+  updateCotResult();
+  highlightCotTable(false);
+}
+
+function renderCotWarning(table) {
+  const box = document.getElementById("cotTableWarn");
+  if (!box) return;
+  box.innerHTML = "";
+  const custom = hasCustomCotationTable(cotState.cat);
+  const anomalies = cotTableAnomalies(table);
+  if (!custom && !anomalies.length) { box.style.display = "none"; return; }
+  box.style.display = "block";
+  const parts = [];
+  if (anomalies.length) {
+    parts.push(el("div", {}, [el("b", {}, "⚠️ Valeurs incohérentes dans cette table : "),
+      anomalies.slice(0, 6).map(a => `${a.col} (niveau${a.niveaux.length > 1 ? "x" : ""} ${a.niveaux.join(", ")})`).join(" · ") +
+      (anomalies.length > 6 ? ` … et ${anomalies.length - 6} autre(s) épreuve(s)` : "") +
+      ". Un niveau plus élevé devrait toujours demander une meilleure performance : la table a probablement été mal lue (colonnes décalées)."]));
+  }
+  if (custom) {
+    const btn = el("button", { class: "btn small", style: "margin-top:8px;" }, "Revenir à la table FFA intégrée");
+    btn.addEventListener("click", () => {
+      confirmAction("Revenir à la table intégrée ?", `La table personnalisée ${COT_PAGE_LABELS[cotState.cat]} importée sur cet appareil sera supprimée et la table FFA intégrée sera utilisée partout dans l'application.`, () => {
+        deleteCotationTable(cotState.cat);
+        toast("Table FFA intégrée rétablie", "success");
+        renderCotationPage();
+      });
+    });
+    parts.push(el("div", {}, [anomalies.length ? "" : "Cette catégorie utilise une table personnalisée importée sur cet appareil. ", btn]));
+  }
+  parts.forEach(p => box.appendChild(p));
+  box.className = "cot-warn-box" + (anomalies.length ? " is-bad" : "");
+}
+
+function renderCotTable(table, cols) {
+  const wrap = document.getElementById("cotTableWrap");
+  wrap.innerHTML = "";
+  if (!table) { wrap.appendChild(el("div", { class: "empty-state" }, "Aucune table disponible pour cette catégorie.")); return; }
+  const thead = el("thead", {}, el("tr", {}, [
+    el("th", { class: "cot-niv" }, isWaCat(cotState.cat) ? "Points" : "Niveau"),
+    ...cols.map(c => {
+      const th = el("th", { "data-col": c.key, title: "Choisir cette épreuve" }, cotColLabel(c.key, cotState.cat));
+      th.addEventListener("click", () => setCotCol(c.key));
+      return th;
+    })
+  ]));
+  const rows = [...table].sort((a, b) => b.niveau - a.niveau);
+  const tbody = el("tbody", {}, rows.map(r => el("tr", { "data-niv": String(r.niveau) }, [
+    el("td", { class: "cot-niv" }, el("span", { class: "cot-niv-pill", style: `background:${isWaCat(cotState.cat) ? waColor(r.niveau) : lvlColorCotation(r.niveau)}` }, String(r.niveau))),
+    ...cols.map(c => el("td", r[c.key] != null
+      ? { "data-col": c.key, class: "cot-cell", title: `Situer ${formatCotValue(r[c.key], c.fmt)} (${isWaCat(cotState.cat) ? r.niveau + " points" : "niveau " + r.niveau})` }
+      : { "data-col": c.key }, formatCotValue(r[c.key], c.fmt)))
+  ])));
+  wrap.appendChild(el("table", { class: "cot-table" }, [thead, tbody]));
+}
+
+function highlightCotTable(scroll) {
+  const wrap = document.getElementById("cotTableWrap");
+  wrap.querySelectorAll(".cot-col-sel").forEach(n => n.classList.remove("cot-col-sel"));
+  wrap.querySelectorAll(".cot-row-hit").forEach(n => n.classList.remove("cot-row-hit"));
+  wrap.querySelectorAll(".cot-cell-hit").forEach(n => n.classList.remove("cot-cell-hit"));
+  wrap.querySelectorAll(`[data-col="${cotState.col}"]`).forEach(n => n.classList.add("cot-col-sel"));
+  const r = cotState._result;
+  const niv = r && r.niveau ? r.niveau : null;
+  if (niv) {
+    const tr = wrap.querySelector(`tr[data-niv="${niv}"]`);
+    if (tr) {
+      tr.classList.add("cot-row-hit");
+      const td = tr.querySelector(`td[data-col="${cotState.col}"]`);
+      if (td) td.classList.add("cot-cell-hit");
+      if (scroll) {
+        const top = tr.offsetTop - wrap.clientHeight / 2 + tr.offsetHeight;
+        wrap.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }
+    }
+  }
+  const th = wrap.querySelector(`th[data-col="${cotState.col}"]`);
+  if (th && scroll !== null) {
+    const left = th.offsetLeft - wrap.clientWidth / 2 + th.offsetWidth / 2;
+    if (left > 0 || wrap.scrollLeft > 0) wrap.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }
+}
+
+function updateCotResult() {
+  const box = document.getElementById("cotResult");
+  const table = loadCotationTable(cotState.cat);
+  const col = COTATION_COLS.find(c => c.key === cotState.col);
+  cotState._result = null;
+  box.innerHTML = "";
+  if (!table || !col) return;
+  const raw = cotState.perf.trim();
+  if (!raw) {
+    box.appendChild(el("div", { class: "cot-hint" }, "Saisissez une performance pour la situer dans la table."));
+    box.appendChild(renderCotGauge(null));
+    return;
+  }
+  const val = parseUserPerf(raw, col.fmt);
+  if (val === null) {
+    box.appendChild(el("div", { class: "cot-hint cot-warn" }, "Format non reconnu — " + COT_FORMAT_HINT[col.fmt]));
+    box.appendChild(renderCotGauge(null));
+    return;
+  }
+  if (isWaCat(cotState.cat)) { renderWaResult(box, table, col, val); return; }
+  const niveau = niveauFromValue(val, col.key, table);
+  cotState._result = { niveau, val };
+  const shown = formatCotValue(val, col.fmt);
+  const better = col.sens === "vitesse" ? "plus rapide" : (["Hauteur", "Perche"].includes(col.key) ? "plus haut" : "plus loin");
+  const lines = [];
+  if (!niveau) {
+    const t1 = cotThreshold(table, col.key, 1);
+    box.appendChild(el("div", { class: "cot-big" }, [
+      el("span", { class: "cot-big-pill", style: "background:#9AAEB6" }, "< 1"),
+      el("div", {}, [el("div", { class: "cot-big-title" }, `${shown} en ${cotColLabel(col.key, cotState.cat)} : sous le niveau 1`),
+        el("div", { class: "cot-big-sub" }, COT_PAGE_LABELS[cotState.cat])])
+    ]));
+    if (t1 !== null) lines.push(`Niveau 1 à ${formatCotValue(t1, col.fmt)} — il manque ${formatCotGap(cotUnits(t1, col.fmt) - cotUnits(val, col.fmt), col.fmt)}.`);
+  } else {
+    const cur = cotThreshold(table, col.key, niveau);
+    box.appendChild(el("div", { class: "cot-big" }, [
+      el("span", { class: "cot-big-pill", style: `background:${lvlColorCotation(niveau)}` }, String(niveau)),
+      el("div", {}, [el("div", { class: "cot-big-title" }, `${shown} en ${cotColLabel(col.key, cotState.cat)} : niveau ${niveau}/50`),
+        el("div", { class: "cot-big-sub" }, `${COT_PAGE_LABELS[cotState.cat]} · seuil du niveau ${niveau} : ${formatCotValue(cur, col.fmt)}`)])
+    ]));
+    if (niveau < 50) {
+      const nx = cotThreshold(table, col.key, niveau + 1);
+      if (nx !== null) lines.push(`Niveau ${niveau + 1} à ${formatCotValue(nx, col.fmt)} — il faut ${formatCotGap(Math.abs(cotUnits(nx, col.fmt) - cotUnits(val, col.fmt)), col.fmt)} de ${col.sens === "vitesse" ? "moins" : "plus"}.`);
+      const goal = Math.min(50, (Math.floor(niveau / 10) + 1) * 10);
+      if (goal > niveau + 1) {
+        const g = cotThreshold(table, col.key, goal);
+        if (g !== null) lines.push(`Niveau ${goal} à ${formatCotValue(g, col.fmt)} — encore ${formatCotGap(Math.abs(cotUnits(g, col.fmt) - cotUnits(val, col.fmt)), col.fmt)} ${better}.`);
+      }
+    } else {
+      lines.push("Niveau maximum de la table.");
+    }
+  }
+  if (lines.length) box.appendChild(el("ul", { class: "cot-lines" }, lines.map(t => el("li", {}, t))));
+  box.appendChild(renderCotGauge(niveau));
+  // Même performance dans les autres tables
+  const realName = cotColLabel(col.key, cotState.cat);
+  const others = COT_PAGE_CATS.filter(c => c !== cotState.cat && !isWaCat(c)).map(code => {
+    const t = loadCotationTable(code);
+    if (!t) return null;
+    const other = cotColumnsOf(t).find(c => cotColLabel(c.key, code) === realName);
+    if (!other) return null;
+    const n = niveauFromValue(val, other.key, t);
+    return el("span", { class: "cot-other" }, [COT_PAGE_LABELS[code] + " : ",
+      el("b", { style: `color:${n ? lvlColorCotation(n) : "var(--grey-dim)"}` }, n ? `niveau ${n}` : "< 1")]);
+  }).filter(Boolean);
+  if (others.length) box.appendChild(el("div", { class: "cot-others" }, [el("span", { class: "cot-others-label" }, "Même épreuve dans les autres tables :"), ...others]));
+}
+
+function renderWaResult(box, table, col, val) {
+  const code = cotState.cat;
+  const pts = waPointsForValue(code, col.key, val);
+  const palier = pts >= WA_STEP ? Math.floor(pts / WA_STEP) * WA_STEP : null;
+  cotState._result = { niveau: palier, val, points: pts };
+  const shown = formatCotValue(val, col.fmt);
+  const label = cotColLabel(col.key, code);
+  const better = col.sens === "vitesse" ? "plus rapide" : (["wa_HJ", "wa_PV"].includes(col.key) ? "plus haut" : "plus loin");
+  const coef = waCoef(code, col.wa);
+  box.appendChild(el("div", { class: "cot-big" }, [
+    el("span", { class: "cot-big-pill wa", style: `background:${waColor(pts)}` }, String(pts)),
+    el("div", {}, [el("div", { class: "cot-big-title" }, `${shown} en ${label} : ${pts} points`),
+      el("div", { class: "cot-big-sub" }, `${COT_PAGE_LABELS[code]} · barème World Athletics 2025`)])
+  ]));
+  const lines = [];
+  const target = (P, prefix) => {
+    if (P > 1400 || !coef) return;
+    const x = waMarkFor(P, coef);
+    if (x === null) return;
+    const v = waEncode(x, col.fmt);
+    const gap = Math.abs(cotUnits(v, col.fmt) - cotUnits(val, col.fmt));
+    lines.push(`${prefix} ${P} points à ${formatCotValue(v, col.fmt)} — encore ${formatCotGap(gap, col.fmt)} ${better}.`);
+  };
+  if (pts >= 1400) lines.push("Maximum du barème (1400 points).");
+  else {
+    target(Math.max(WA_STEP, (Math.floor(pts / WA_STEP) + 1) * WA_STEP), "Palier de");
+    const hundred = (Math.floor(pts / 100) + 1) * 100;
+    if (hundred % WA_STEP === 0 && hundred > (Math.floor(pts / WA_STEP) + 1) * WA_STEP) target(hundred, "Palier de");
+    const ref = [500, 700, 900, 1000, 1100, 1200].find(p => p > pts + 100);
+    if (ref) target(ref, "Repère :");
+  }
+  box.appendChild(el("ul", { class: "cot-lines" }, lines.map(t => el("li", {}, t))));
+  // jauge 0 → 1400 par paliers de 50
+  const g = el("div", { class: "cot-gauge", title: `${pts} points` });
+  for (let P = WA_STEP; P <= 1400; P += WA_STEP) {
+    const cell = el("span", { style: `background:${waColor(P)};opacity:${pts >= P ? 1 : 0.18}` });
+    if (palier === P) cell.className = "on";
+    g.appendChild(cell);
+  }
+  box.appendChild(el("div", { class: "cot-gauge-wrap" }, [g, el("div", { class: "cot-gauge-axis" }, ["0", "350", "700", "1050", "1400"].map(t => el("span", {}, t)))]));
+  // même épreuve dans l'autre table WA (épreuves identiques seulement : même engin, même hauteur)
+  const other = code === "WAM" ? "WAF" : "WAM";
+  const oc = WA_EVENTS.find(e => e.key === col.key);
+  if (oc && (other === "WAF" ? oc.f : oc.m) === label) {
+    const op = waPointsForValue(other, col.key, val);
+    box.appendChild(el("div", { class: "cot-others" }, [el("span", { class: "cot-others-label" }, "Même épreuve dans l'autre table :"),
+      el("span", { class: "cot-other" }, [COT_PAGE_LABELS[other] + " : ", el("b", { style: `color:${waColor(op)}` }, `${op} points`)])]));
+  }
+  box.appendChild(el("div", { class: "cot-hint", style: "margin:10px 0 0;font-size:11.5px;" },
+    "Barème identique pour tous les âges, avec les engins et hauteurs de haies seniors : pour un cadet ou un junior, il ne s'applique qu'aux épreuves courues ou lancées avec ces mêmes engins."));
+}
+
+function renderCotGauge(niveau) {
+  const g = el("div", { class: "cot-gauge", title: niveau ? `Niveau ${niveau}/50` : "" });
+  for (let i = 1; i <= 50; i++) {
+    const cell = el("span", { style: `background:${lvlColorCotation(i)};opacity:${niveau && i <= niveau ? 1 : 0.18}` });
+    if (niveau === i) cell.className = "on";
+    g.appendChild(cell);
+  }
+  return el("div", { class: "cot-gauge-wrap" }, [g, el("div", { class: "cot-gauge-axis" }, ["1", "10", "20", "30", "40", "50"].map(t => el("span", {}, t)))]);
 }
 
 function lvlColorCotation(n) {
@@ -2167,7 +3818,7 @@ function renderAthleteCotation(athleteRows) {
     // Meilleure perf par colonne de cotation (pour cet athlète, sur la sélection d'année)
     const bestByCol = {};
     for (const r of rows) {
-      const colKey = COTATION_EPREUVE_MAP[r.epreuve];
+      const colKey = cotationColFor(r.epreuve);
       if (!colKey) continue;
       const val = perfToTableValue(r.performance, colKey);
 
@@ -2367,7 +4018,7 @@ function renderAthleteCotationBadge(rows) {
 
   const bestByCol = {};
   for (const r of rowsCurrent) {
-    const colKey = COTATION_EPREUVE_MAP[r.epreuve];
+    const colKey = cotationColFor(r.epreuve);
     if (!colKey) continue;
     const niv = getNiveauFFAForRow(r);
     if (!niv) continue;
@@ -2417,12 +4068,13 @@ function renderDashCotation(rowsFiltered) {
   }
 
   const years = [...new Set(DB.map(r => r.annee))].sort().reverse();
-  anneeSel.innerHTML = `<option value="best">Toutes années</option>` +
-    years.map(y => `<option value="${y}">${y}</option>`).join("");
+  const keepYears = new Set(Array.from(anneeSel.selectedOptions || []).map(o => o.value));
+  anneeSel.innerHTML = years.map(y => `<option value="${y}"${keepYears.has(String(y)) ? " selected" : ""}>${y}</option>`).join("");
   if (!anneeSel._init) {
-    anneeSel.addEventListener("change", () => renderCotSynth());
+    anneeSel.addEventListener("change", () => { syncYearChips("dashCotAnnee"); renderCotSynth(); });
     anneeSel._init = true;
   }
+  syncYearChips("dashCotAnnee");
   if (sexeSel && !sexeSel._init) {
     sexeSel.addEventListener("change", () => renderCotSynth());
     sexeSel._init = true;
@@ -2440,17 +4092,22 @@ function renderCotSynth() {
 
   const pairCode = catSel.value; // ex: "BE", "MI"
   const code = pairCode; // gardé pour compatibilité variable locale
-  const annee = anneeSel.value;
+  // Années choisies (aucune = toutes années, meilleure performance)
+  const selYears = Array.from(anneeSel.selectedOptions || []).map(o => o.value);
+  const annee = selYears.length ? yearsLabel(selYears) : "best";
   const sexeFilter = sexeSel ? sexeSel.value : "all";
-  const showBoth = (annee !== "best");
+  const showBoth = selYears.length > 0;
 
   const codeM = pairCode + "M";
   const codeF = pairCode + "F";
   const tableM = loadCotationTable(codeM);
   const tableF = loadCotationTable(codeF);
-  // Utiliser la première table disponible (les deux ont la même structure)
+  // Chaque athlète est coté avec la table de SON sexe (les tables garçons et filles
+  // sont différentes). Les colonnes affichées réunissent celles des deux tables.
   const table = tableM || tableF;
   if (!table) return;
+  const tableForSexe = (sexe) => (sexe === "F" ? tableF : tableM) || table;
+  const hasCol = (t, k) => !!t && t.length && t.some(r => r[k] !== null && r[k] !== undefined);
 
   // Catégorie d'âge (commune M et F)
   const catInfoM = COTATION_CATS[codeM];
@@ -2470,12 +4127,12 @@ function renderCotSynth() {
       const sexMatch = sexe === "all" || r.sexe === sexe;
       return catMatch && sexMatch;
     });
-    if (anneeFilter !== "best") rows = rows.filter(r => String(r.annee) === anneeFilter);
+    if (anneeFilter !== "best") rows = rows.filter(r => anneeFilter.includes(String(r.annee)));
     return rows;
   };
 
   const athletesAll  = getAthletes("best", sexeFilter);
-  const athletesYear = getAthletes(annee, sexeFilter);
+  const athletesYear = getAthletes(showBoth ? selYears : "best", sexeFilter);
 
   // Détruire les anciens graphiques
   Object.values(dashCotCharts).forEach(c => { try { c.destroy(); } catch(e){} });
@@ -2483,7 +4140,19 @@ function renderCotSynth() {
   grid.innerHTML = "";
 
   const cols = COTATION_COLS.filter(c => c.key !== "pts" && c.key !== "4x60mMixte" && c.sens
-    && table.length && Object.prototype.hasOwnProperty.call(table[0], c.key));
+    && ((sexeFilter !== "F" && hasCol(tableM, c.key)) || (sexeFilter !== "M" && hasCol(tableF, c.key))));
+
+  // Nom réel de l'épreuve : garçons, filles, ou les deux s'ils diffèrent
+  const synthColLabel = (key) => {
+    const lm = cotColLabel(key, codeM), lf = cotColLabel(key, codeF);
+    const inM = hasCol(tableM, key), inF = hasCol(tableF, key);
+    if (inM && !inF) return lm;
+    if (inF && !inM) return lf;
+    if (sexeFilter === "M" || lm === lf) return sexeFilter === "F" ? lf : lm;
+    if (sexeFilter === "F") return lf;
+    const w = lm.split(" ")[0];
+    return lf.startsWith(w + " ") ? `${lm} G · ${lf.slice(w.length + 1)} F` : `${lm} G · ${lf} F`;
+  };
 
   cols.forEach(col => {
     // Distribution "toutes années" (fond grisé quand annee filtrée)
@@ -2491,17 +4160,17 @@ function renderCotSynth() {
       const noms = [...new Set(athletes.map(r => r.nom))];
       const dist = {};
       for (const nom of noms) {
-        const perfsNom = athletes.filter(r => r.nom === nom && COTATION_EPREUVE_MAP[r.epreuve] === col.key);
+        const perfsNom = athletes.filter(r => r.nom === nom && cotationColFor(r.epreuve) === col.key);
         if (!perfsNom.length) continue;
         let best = null;
         for (const r of perfsNom) {
           const val = perfToTableValue(r.performance, col.key);
           if (!val) continue;
           if (!best || (col.sens === "vitesse" ? val < best.val : val > best.val))
-            best = { val, perf: r.performance, nom };
+            best = { val, perf: r.performance, nom, sexe: r.sexe };
         }
         if (!best) continue;
-        const niv = getNiveauCotation(best.perf, col.key, table);
+        const niv = getNiveauCotation(best.perf, col.key, tableForSexe(best.sexe));
         if (!niv) continue;
         if (!dist[niv]) dist[niv] = [];
         dist[niv].push(nom);
@@ -2544,7 +4213,7 @@ function renderCotSynth() {
 
     card.innerHTML = `
       <div class="cot-synth-card-title">
-        <span>${col.label} ${avgBadge}</span>
+        <span>${synthColLabel(col.key)} ${avgBadge}</span>
         <span style="font-size:11px;font-weight:400;color:var(--grey)">${showBoth ? totalYear+"/"+totalAll : totalAll} ath.</span>
       </div>
       <div class="cot-synth-chart"><canvas id="${id}"></canvas></div>

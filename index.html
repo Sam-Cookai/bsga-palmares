@@ -367,6 +367,84 @@ a{color:var(--amber);}
   background:var(--amber); color:#FFFFFF; border-color:var(--amber);
 }
 .btn.primary:hover{background:#C9350F; border-color:#C9350F;}
+.ffa-steps{display:grid; gap:14px;}
+.ffa-last-import{margin:-4px 0 14px;padding:8px 12px;border-radius:8px;background:#EEF3F5;font-size:12.5px;color:var(--grey);line-height:1.5;}
+.ffa-last-import b{color:var(--ink);}
+/* ---- Page Tables de cotation ---- */
+.cot-form{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:end;}
+.cot-form .field select, .cot-form .field input{width:100%;}
+.cot-chip{padding:6px 13px;border:1px solid var(--line-strong);border-radius:16px;background:#fff;color:var(--grey);font:600 12.5px var(--font-body);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.cot-chip:hover{border-color:var(--navy);color:var(--navy);}
+.cot-chip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.cot-chip:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+select[hidden]{display:none !important;}
+.synth-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--grey);}
+.synth-legend > span{display:inline-flex;align-items:center;gap:5px;}
+.year-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.cot-chip-group{flex-basis:100%;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--grey-dim);margin:4px 0 -1px;}
+.cot-chip-group:first-child{margin-top:0;}
+.cot-big-pill.wa{min-width:74px;font-size:22px;}
+.year-chips .cot-chip{padding:4px 10px;font-size:12px;border-radius:14px;}
+.year-chips-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-2px 0 12px;}
+.year-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--grey-dim);}
+.cot-pf{display:flex;align-items:flex-start;gap:4px;}
+.cot-pf-cell{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.cot-pf-input{width:58px !important;text-align:center;font-family:var(--font-mono);font-size:18px !important;font-weight:700;color:var(--navy);padding:8px 4px !important;}
+.cot-pf-label{font-size:10px;color:var(--grey-dim);text-transform:uppercase;letter-spacing:.4px;}
+.cot-pf-sep{font-family:var(--font-mono);font-size:22px;font-weight:800;color:var(--navy);line-height:40px;padding:0 1px;}
+.cot-result{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:10px;background:#F7FAFB;}
+.cot-hint{font-size:13px;color:var(--grey);margin-bottom:12px;}
+.cot-warn{color:#B23A12;}
+.cot-big{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.cot-big-pill{min-width:54px;height:54px;padding:0 8px;border-radius:12px;color:#fff;font:800 24px/54px var(--font-mono);text-align:center;}
+.cot-big-title{font-weight:700;font-size:16px;color:var(--ink);}
+.cot-big-sub{font-size:12.5px;color:var(--grey);margin-top:2px;}
+.cot-lines{margin:6px 0 12px;padding-left:18px;font-size:13px;color:var(--ink);line-height:1.6;}
+.cot-gauge{display:flex;gap:2px;height:16px;}
+.cot-gauge span{flex:1;border-radius:2px;}
+.cot-gauge span.on{outline:2px solid var(--ink);outline-offset:1px;}
+.cot-gauge-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--grey-dim);margin-top:3px;font-family:var(--font-mono);}
+.cot-others{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px;color:var(--grey);}
+.cot-others-label{font-weight:600;}
+.cot-warn-box{margin:0 0 12px;padding:10px 12px;border-radius:8px;background:#EEF3F5;color:var(--grey);font-size:12.5px;line-height:1.5;}
+.cot-warn-box.is-bad{background:#FFF4E0;color:#7A4F00;}
+.cot-table-wrap{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:8px;}
+.cot-table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12.5px;}
+.cot-table th,.cot-table td{padding:6px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line);}
+.cot-table thead th{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;font-size:11px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;}
+.cot-table td{font-family:var(--font-mono);color:var(--ink);}
+.cot-table .cot-niv{position:sticky;left:0;z-index:1;background:#fff;}
+.cot-table thead .cot-niv{z-index:3;background:var(--navy-2);cursor:default;}
+.cot-niv-pill{display:inline-block;min-width:26px;padding:1px 6px;border-radius:8px;color:#fff;font-weight:800;font-size:12px;}
+.cot-table th.cot-col-sel{background:var(--amber);}
+.cot-table td.cot-col-sel{background:#FFF4EF;font-weight:700;color:var(--navy);}
+.cot-table tr.cot-row-hit td{background:#FFF3C4;}
+.cot-table tr.cot-row-hit td.cot-niv{background:#FFF3C4;}
+.cot-table td.cot-cell, .cot-table td.cot-niv{cursor:pointer;}
+.cot-table td.cot-cell:hover{outline:2px solid var(--amber);outline-offset:-2px;background:#FFF4EF;}
+.cot-table td.cot-cell-hit{background:var(--amber)!important;color:#fff;font-weight:800;}
+@media (max-width: 760px){
+  .cot-form{grid-template-columns:1fr;}
+  .cot-field-cat{grid-column:1 / -1;}
+  .cot-table-wrap{max-height:460px;}
+  .cot-big-title{font-size:14.5px;}
+}
+.ffa-step{display:grid; grid-template-columns:28px 1fr; gap:12px; align-items:start;}
+.ffa-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.ffa-step-title{font-weight:700;font-size:13.5px;color:var(--ink);}
+.ffa-step-text{font-size:12.5px;color:var(--grey);margin-top:3px;line-height:1.45;}
+.ffa-bookmarklet{display:inline-flex;margin-top:8px;cursor:grab;border-style:dashed;border-color:var(--navy);color:var(--navy);font-weight:700;}
+.ffa-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;}
+.ffa-check{position:relative;display:inline-flex;align-items:center;cursor:pointer;user-select:none;}
+.ffa-check input{position:absolute;left:0;top:0;width:1px;height:1px;margin:0;opacity:0;pointer-events:none;}
+.ffa-check span{padding:5px 11px;border:1px solid var(--line-strong);border-radius:16px;font-size:12.5px;color:var(--grey);background:#fff;font-weight:600;}
+.ffa-check input:checked + span{background:var(--navy);border-color:var(--navy);color:#fff;}
+.ffa-check input:focus-visible + span{outline:2px solid var(--amber);outline-offset:2px;}
+.chrono-badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;font-family:var(--font-body);font-size:10px;font-weight:700;vertical-align:1px;letter-spacing:.2px;}
+.chrono-badge.man{background:#FCE6DE;color:#B23A12;}
+.chrono-badge.elec{background:#E3EEF3;color:#5C7782;}
+.ffa-select{border:1px solid var(--line-strong);border-radius:5px;padding:5px 8px;font-size:13px;color:var(--ink);background:#fff;}
+.ffa-status{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:12.5px;background:#E6F4EA;color:#1E6B34;}
 .btn.danger{border-color:rgba(200,16,46,0.4); color:var(--red);}
 .btn.danger:hover{background:rgba(200,16,46,0.12); border-color:var(--red);}
 .btn.ghost{background:transparent;}
@@ -499,6 +577,8 @@ tbody tr:hover{background:var(--amber-dim);}
   overflow:hidden; text-overflow:ellipsis;
 }
 .perf-cell{font-family:var(--font-mono); font-weight:700; color:var(--navy);}
+#explorerTable td.perf-cell, #athleteTable td.perf-cell{ white-space:normal; overflow:visible; }
+.chrono-badge{ white-space:nowrap; }
 .perf-record{color:#8B6914; font-size:13.5px;}
 .perf-record-abs{color:#7A4F00; font-size:13.5px; font-weight:800;}
 .perf-best{color:#0D5E8E;}
@@ -721,6 +801,10 @@ select, input{ color-scheme: light; }
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     Athlètes
   </button>
+  <button class="mobile-nav-btn" data-page="cotation">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+    Cotation
+  </button>
   <button class="mobile-nav-btn" data-page="import">
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     Importer
@@ -751,6 +835,10 @@ select, input{ color-scheme: light; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       Fiches athlètes
     </button>
+    <button class="nav-btn" data-page="cotation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+      Tables de cotation
+    </button>
     <button class="nav-btn" data-page="import">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
       Importer des résultats
@@ -763,7 +851,8 @@ select, input{ color-scheme: light; }
 
     <div class="sidebar-foot">
       <span class="dot-status"></span>Base chargée<br>
-      <span id="sb-count">0</span> résultats en mémoire
+      <span id="sb-count">0</span> résultats en mémoire<br>
+      <span id="sb-last-import" style="font-size:11px;opacity:.85;">Dernier import : —</span>
       <div class="sidebar-version">Version <span id="appVersion"></span></div>
       <div class="sidebar-credit">Kevin Marq Product</div>
     </div>
@@ -778,6 +867,7 @@ select, input{ color-scheme: light; }
         <div>
           <h1 class="page-title">Tableau de bord</h1>
           <div class="page-sub">BSGA Palmarès — Vue d'ensemble de la saison</div>
+          <div class="page-sub" id="dashLastImport" style="margin-top:3px;font-size:12px;">Dernier import des résultats : —</div>
         </div>
         <div class="head-actions">
           <select class="field" id="dashYear" style="width:auto; padding:9px 12px; border-radius:7px; background:var(--card); border:1px solid var(--line-strong); color:var(--chalk); font-size:13px;"></select>
@@ -800,7 +890,7 @@ select, input{ color-scheme: light; }
         <div class="panel">
           <div class="panel-title">Répartition par catégorie d'âge</div>
           <div class="chart-box"><canvas id="chartPodiums"></canvas></div>
-          <div class="legend-note">Nombre d'athlètes distincts par catégorie FFA officielle (Benjamin à Master/Vétéran) ; chaque athlète n'est compté qu'une fois, quel que soit son nombre de résultats.</div>
+          <div class="legend-note">Nombre d'athlètes distincts par catégorie FFA officielle (garçons et filles ensemble, de Poussins à Masters) ; chaque athlète n'est compté qu'une fois, quel que soit son nombre de résultats.</div>
         </div>
       </div>
 
@@ -830,10 +920,7 @@ select, input{ color-scheme: light; }
       <div class="panel">
         <div class="panel-title">Filtres</div>
         <div class="filters-grid">
-          <div class="field">
-            <label>Année</label>
-            <select id="f-annee" multiple></select>
-          </div>
+          <select id="f-annee" multiple hidden aria-hidden="true"></select>
           <div class="field">
             <label>Sexe</label>
             <select id="f-sexe" multiple></select>
@@ -863,6 +950,15 @@ select, input{ color-scheme: light; }
               <option value="abs">👑 Record absolu (toutes catégories)</option>
               <option value="cat">🏆 Record par catégorie d'âge</option>
               <option value="both">👑 + 🏆 Tous les records</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Chronométrage</label>
+            <select id="f-chrono" title="Les temps manuels et électriques ne sont pas directement comparables : par défaut ils sont classés séparément.">
+              <option value="">Électrique + manuel (classés séparément)</option>
+              <option value="C">Électrique + manuel combinés (un seul classement)</option>
+              <option value="E">Électrique uniquement</option>
+              <option value="M">Manuel uniquement</option>
             </select>
           </div>
           <div class="field">
@@ -901,12 +997,12 @@ select, input{ color-scheme: light; }
             <colgroup>
               <col style="width:64px">
               <col style="width:56px">
-              <col style="width:12%">
-              <col style="width:20%">
+              <col style="width:10%">
+              <col style="width:17%">
               <col style="width:11%">
               <col style="width:64px">
-              <col style="width:16%">
-              <col style="width:21%">
+              <col style="width:22%">
+              <col style="width:20%">
               <col style="width:88px">
             </colgroup>
             <thead>
@@ -939,10 +1035,11 @@ select, input{ color-scheme: light; }
             <option value="M">Garçons</option>
             <option value="F">Filles</option>
           </select>
-          <label style="font-size:12px;font-weight:600;color:var(--grey);">Année</label>
-          <select id="dashCotAnnee">
-            <option value="best">Toutes années (meilleure perf.)</option>
-          </select>
+        </div>
+        <div class="year-chips-row">
+          <label style="font-size:12px;font-weight:600;color:var(--grey);">Années</label>
+          <select id="dashCotAnnee" multiple hidden aria-hidden="true"></select>
+          <div id="dashCotAnnee-chips" class="year-chips" data-all-label="Toutes années" role="group" aria-label="Années"></div>
         </div>
         <div class="legend-note" style="margin-bottom:12px;">
           Chaque barre = nombre d'athlètes du club atteignant ce niveau sur la table de cotation FFA (1 = initiation · 50 = élite). Survolez une barre pour voir les noms.
@@ -969,7 +1066,7 @@ select, input{ color-scheme: light; }
           <input type="text" id="athleteSearch" placeholder="Rechercher un athlète..." style="width:100%; background:#F4F8FA; border:1px solid var(--line-strong); color:var(--chalk); padding:9px 10px; border-radius:7px; font-size:13px; margin-bottom:10px;">
           <div class="table-wrap" style="max-height:460px;">
             <table>
-              <thead><tr><th>Athlète</th><th>Résultats</th></tr></thead>
+              <thead><tr><th>Athlète</th><th>Résultats</th><th>Né·e</th><th>Catégorie</th></tr></thead>
               <tbody id="athleteList"></tbody>
             </table>
           </div>
@@ -1027,16 +1124,56 @@ select, input{ color-scheme: light; }
             <colgroup>
               <col style="width:64px">
               <col style="width:16%">
-              <col style="width:30%">
+              <col style="width:24%">
               <col style="width:14%">
               <col style="width:64px">
-              <col style="width:18%">
+              <col style="width:24%">
               <col style="width:88px">
             </colgroup>
             <thead><tr><th>Année</th><th>Discipline</th><th>Épreuve</th><th>Catégorie</th><th>Place</th><th>Performance</th><th title="Niveau de cotation FFA (Benjamin/Minime uniquement)">Niveau FFA</th></tr></thead>
             <tbody id="athleteTableBody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- ============ PAGE: TABLES DE COTATION ============ -->
+    <div class="page" id="page-cotation">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Tables de cotation FFA</h1>
+          <div class="page-sub">FFA : benjamins et minimes, niveaux 1 à 50 · World Athletics : cadets à masters, points 0 à 1400</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Situer une performance</div>
+        <div class="cot-form">
+          <div class="field cot-field-cat">
+            <label>Table</label>
+            <div id="cotCats" class="ffa-checks"></div>
+          </div>
+          <div class="field">
+            <label for="cotEpreuve">Épreuve</label>
+            <select id="cotEpreuve"></select>
+          </div>
+          <div class="field">
+            <label>Performance</label>
+            <div id="cotPerfFields" class="cot-pf" role="group" aria-label="Performance"></div>
+          </div>
+        </div>
+        <div id="cotPerfHelp" class="legend-note" style="margin:8px 0 0;"></div>
+        <div id="cotResult" class="cot-result" aria-live="polite"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;">
+          <span id="cotTableTitle">Table de cotation</span>
+          <span id="cotTableSource" style="font-size:11.5px;font-weight:500;color:var(--grey-dim);"></span>
+        </div>
+        <div id="cotTableWarn" class="cot-warn-box" style="display:none;"></div>
+        <div class="legend-note" style="margin:0 0 10px;">Cliquez sur une valeur pour la situer (elle s'affiche dans « Situer une performance »), ou sur le nom d'une épreuve pour la choisir. La colonne choisie et le niveau atteint sont surlignés.</div>
+        <div id="cotTableWrap" class="cot-table-wrap"></div>
       </div>
     </div>
 
@@ -1053,6 +1190,47 @@ select, input{ color-scheme: light; }
         <div class="step active" id="step1"><span class="num">1</span> Charger un fichier ou coller du texte</div>
         <div class="step" id="step2"><span class="num">2</span> Vérifier les doublons détectés</div>
         <div class="step" id="step3"><span class="num">3</span> Valider l'ajout à la base</div>
+      </div>
+
+      <div class="panel" id="ffaAutoPanel">
+        <div class="panel-title">Récupération automatique depuis athle.fr</div>
+        <div id="importLastImport" class="ffa-last-import">Dernier import : —</div>
+        <div class="ffa-steps">
+          <div class="ffa-step">
+            <div class="ffa-num">1</div>
+            <div>
+              <div class="ffa-step-title">Installer le bouton (une seule fois)</div>
+              <div class="ffa-step-text">Faites glisser ce bouton dans votre barre de favoris :</div>
+              <a id="ffaBookmarklet" class="btn ffa-bookmarklet" href="#" title="Faites-moi glisser dans la barre de favoris">📥 Envoyer au Palmarès BSGA</a>
+              <div class="ffa-step-text" style="margin-top:6px;">Barre de favoris invisible ? <b>Ctrl+Maj+B</b> (Cmd+Maj+B sur Mac).
+                Sur téléphone : <a href="#" id="ffaCopyBookmarklet">copier le code du bouton</a>, créez un favori nommé « Palmares BSGA » et collez ce code à la place de l'adresse.</div>
+            </div>
+          </div>
+          <div class="ffa-step">
+            <div class="ffa-num">2</div>
+            <div>
+              <div class="ffa-step-title">Ouvrir les résultats du club</div>
+              <div class="ffa-step-text" style="margin-top:6px;">Années à récupérer :</div>
+              <div id="ffaYears" class="ffa-checks"></div>
+              <div class="ffa-step-text" style="margin-top:8px;">Sexe :</div>
+              <div id="ffaSexes" class="ffa-checks">
+                <label class="ffa-check"><input type="checkbox" value="F" checked><span>Femmes</span></label>
+                <label class="ffa-check"><input type="checkbox" value="M" checked><span>Hommes</span></label>
+              </div>
+              <button class="btn primary small" id="ffaOpenBtn" style="margin-top:10px;">Ouvrir athle.fr</button>
+            </div>
+          </div>
+          <div class="ffa-step">
+            <div class="ffa-num">3</div>
+            <div>
+              <div class="ffa-step-title">Envoyer les résultats</div>
+              <div class="ffa-step-text">Sur la page athle.fr qui s'est ouverte, cliquez sur le favori <b>📥 Envoyer au Palmarès BSGA</b>.
+                Les résultats arrivent directement ici, avec la catégorie FFA de chaque athlète. Il ne reste qu'à vérifier puis valider.</div>
+              <div class="ffa-step-text" style="margin-top:4px;">Si la fenêtre de l'application a été fermée entre-temps, le bouton télécharge un fichier <code>.json</code> : déposez-le simplement dans la zone ci-dessous.</div>
+              <div id="ffaStatus" class="ffa-status" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="panel">
@@ -1102,6 +1280,20 @@ select, input{ color-scheme: light; }
           <h1 class="page-title">Base de données</h1>
           <div class="page-sub">Sauvegardez, chargez ou réinitialisez la base locale</div>
         </div>
+      </div>
+
+      <div class="panel" id="publishPanel">
+        <div class="panel-title">Publier la base en ligne (GitHub)</div>
+        <p style="color:var(--grey); font-size:13px; line-height:1.6; margin:0 0 10px;">
+          Pour que tous les appareils (ordinateurs, téléphones) voient la même base :
+        </p>
+        <ol style="color:var(--grey); font-size:13px; line-height:1.7; margin:0 0 12px; padding-left:20px;">
+          <li>Cliquez sur le bouton ci-dessous : il génère le fichier <code>data.js</code> avec tous les résultats et les dates de naissance de cet appareil.</li>
+          <li>Sur <b>github.com/Sam-Cookai/bsga-palmares</b> : <b>Add file → Upload files</b>, déposez <code>data.js</code>, puis <b>Commit changes</b> (il remplace l'ancien).</li>
+          <li>Après 1 à 2 minutes, chaque appareil qui ouvre l'application en ligne ajoute automatiquement les résultats qui lui manquent (rien n'est supprimé).</li>
+        </ol>
+        <button class="btn primary" id="publishDataJsBtn">Générer data.js pour GitHub</button>
+        <div id="publishInfo" class="ffa-status" style="display:none;"></div>
       </div>
 
       <div class="two-col">
