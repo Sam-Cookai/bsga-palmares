@@ -1,6 +1,6 @@
 // BSGA Palmarès — Service Worker
 // Permet le fonctionnement hors-ligne en mettant en cache tous les fichiers de l'app.
-const CACHE_NAME = "bsga-palmares-v0.49";
+const CACHE_NAME = "bsga-palmares-v0.50";
 const FILES_TO_CACHE = [
   "./index.html",
   "./app.js",

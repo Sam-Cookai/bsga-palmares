@@ -6,7 +6,7 @@
    en tout ou partie, sans autorisation écrite préalable est interdite.
    =========================================================== */
 
-const APP_VERSION = "0.49";
+const APP_VERSION = "0.50";
 
 const COTATION_STORAGE_PREFIX = "bsga_cotation_v1_";
 
@@ -1567,6 +1567,10 @@ document.getElementById("athleteSearch").addEventListener("input", (e) => render
 function selectAthlete(name) {
   selectedAthlete = name;
   renderAthletesList(document.getElementById("athleteSearch").value);
+  // Sur téléphone, la fiche est sous la liste : on l'amène à l'écran
+  if (window.innerWidth <= 900 && document.getElementById("page-athletes").classList.contains("active")) {
+    setTimeout(() => { const c = document.getElementById("athleteCardPanel"); if (c) c.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  }
 
   const map = getAthletesAggregated();
   const rows = (map[name] || []).slice().sort((a,b) => (b.annee - a.annee) || a.epreuve.localeCompare(b.epreuve, 'fr'));
@@ -1716,7 +1720,9 @@ function selectAthlete(name) {
       el("td", { title: r.epreuve }, r.epreuve),
       el("td", { title: catLabel(r) + (/^Master M/.test(catLabel(r)) ? " — " + masterSubRange(catLabel(r).slice(7)) : "") }, catLabel(r)),
       el("td", {}, el("span", { class: placePillClass(r.place) }, String(r.place))),
-      el("td", { class: perfClass }, [perfPrefix + r.performance, chronoBadge(r)]),
+      el("td", { class: perfClass }, [perfPrefix + r.performance, chronoBadge(r),
+        // niveau répété dans la case Performance, affiché seulement sur téléphone
+        niveauFFA ? el("span", { class: "niv-inline", style: `background:${lvlColorCotation(niveauFFA)}` }, "niv. " + niveauFFA) : ""]),
       niveauCell
     ]));
   });
@@ -2716,7 +2722,7 @@ function renderSettings() {
   ].forEach(([label, val, foot]) => {
     row.appendChild(el("div", { class: "kpi-card" }, [
       el("div", { class: "kpi-label" }, label),
-      el("div", { class: "kpi-value" }, String(val)),
+      el("div", { class: "kpi-value" + (/\//.test(String(val)) ? " kpi-date" : "") }, String(val)),
       el("div", { class: "kpi-foot" }, foot)
     ]));
   });

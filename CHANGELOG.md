@@ -7,6 +7,27 @@ complète.
 
 ---
 
+## Version 0.50
+
+- **Corrections pour téléphone** :
+  - la page Fiches athlètes débordait de l'écran (550 px pour un écran
+    de 390) depuis l'ajout de la colonne « Né·e » : la page glissait
+    de côté et la fiche était coupée. Les blocs restent maintenant dans
+    la largeur de l'écran sur toutes les pages (contrôlé à 390 et
+    360 px de large) ;
+  - en touchant un athlète, la fiche défile automatiquement à l'écran
+    (elle était affichée sous la liste, hors de vue) et ne défile plus
+    dans un cadre à l'intérieur de la page ;
+  - liste des athlètes compacte (Athlète · Né·e · Catégorie) ;
+  - pastilles (tables, années, sexe) et petits boutons agrandis pour
+    le doigt (38 px de haut).
+  - détail des performances de la fiche sans défilement de côté :
+    Année · Épreuve · Place · Performance, le niveau FFA étant affiché
+    en pastille dans la case Performance ;
+  - date du dernier import (page Base de données) qui était tronquée ;
+  - indication « faites glisser le tableau » au-dessus du grand tableau
+    de l'Explorer.
+
 ## Version 0.49
 
 - **Publication en un clic sur GitHub** (page Base de données) : après

@@ -309,7 +309,7 @@ a{color:var(--amber);}
   .chip { font-size: 11px; padding: 3px 8px; }
 
   /* --- Two-col : 1 colonne --- */
-  .two-col { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: minmax(0,1fr); }
 
   /* --- Dropzone import --- */
   .dropzone { padding: 20px 14px; }
@@ -368,6 +368,9 @@ a{color:var(--amber);}
 }
 .btn.primary:hover{background:#C9350F; border-color:#C9350F;}
 .ffa-steps{display:grid; gap:14px;}
+.niv-inline{display:none;margin-left:6px;padding:1px 6px;border-radius:7px;color:#fff;font-family:var(--font-mono);font-size:10.5px;font-weight:800;vertical-align:1px;white-space:nowrap;}
+.swipe-hint{display:none;font-size:11.5px;color:var(--grey-dim);margin:0 0 6px;text-align:right;}
+.kpi-value.kpi-date{font-size:22px;white-space:nowrap;}
 .gh-pending{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;border-radius:8px;background:#FFF4E0;color:#7A4F00;font-size:12.5px;}
 .gh-pending .btn{padding:5px 12px;font-size:12px;}
 .gh-status{font-size:12.5px;color:var(--grey);line-height:1.6;}
@@ -735,8 +738,36 @@ select, input{ color-scheme: light; }
 .checkbox-row{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--grey); margin-top:8px;}
 .checkbox-row input{width:auto;}
 
-.two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
-@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+.two-col{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px;}
+@media (max-width:900px){.two-col{grid-template-columns:minmax(0,1fr);}}
+/* Un bloc de grille ne doit jamais s'élargir au-delà de l'écran à cause d'un tableau :
+   c'est le tableau qui défile dans son cadre. */
+/* ---- Téléphone : cibles tactiles confortables, liste d'athlètes compacte, fiche sans double défilement ---- */
+@media (max-width:760px){
+  .cot-chip, .year-chips .cot-chip { min-height:38px; padding:8px 14px; font-size:13px; }
+  .ffa-check span { display:inline-flex; align-items:center; min-height:38px; padding:6px 14px; font-size:13px; }
+  #athleteListTable th:nth-child(2), #athleteListTable td:nth-child(2) { display:none; }
+  #athleteListTable { width:100%; }
+  #athleteListTable td, #athleteListTable th { white-space:normal; word-break:normal; overflow-wrap:anywhere; }
+  #athleteListTable td:nth-child(3), #athleteListTable th:nth-child(3) { width:52px; }
+  #athleteListTable th { white-space:nowrap; overflow-wrap:normal; }
+  #athleteListTable td:nth-child(4) { font-size:12.5px; }
+  /* Détail des performances de la fiche : colonnes essentielles seulement, sans défilement de côté */
+  #athleteTable { min-width:0 !important; table-layout:auto !important; width:100%; }
+  #athleteTable col { width:auto !important; }
+  #athleteTable th:nth-child(2), #athleteTable td:nth-child(2),
+  #athleteTable th:nth-child(4), #athleteTable td:nth-child(4),
+  #athleteTable th:nth-child(7), #athleteTable td:nth-child(7) { display:none; }
+  #athleteTable .niv-inline { display:inline-block; }
+  #athleteTable td, #athleteTable th { white-space:normal; overflow:visible; text-overflow:clip; padding-left:8px; padding-right:8px; }
+  #athleteTable td.perf-cell { font-size:12px; }
+  .swipe-hint { display:block !important; }
+  .kpi-value.kpi-date { font-size:17px !important; }
+  #athleteListTable td, #athleteListTable th { padding-left:10px; padding-right:10px; }
+  #athleteCardPanel { max-height:none !important; overflow:visible !important; scroll-margin-top:72px; }
+  .btn.small { min-height:36px; }
+}
+.two-col > *, .charts-grid > *, .kpi-row > *, .filters-grid > *, .cot-synth-grid > *, .cotation-grid > * { min-width:0; }
 
 .legend-note{font-size:11.5px; color:var(--grey-dim); margin-top:8px; line-height:1.5;}
 
@@ -767,6 +798,12 @@ select, input{ color-scheme: light; }
 .cot-synth-card{background:#fff;border-radius:10px;border:1px solid var(--line);padding:12px 14px;box-shadow:0 2px 6px rgba(13,94,142,.05);}
 .cot-synth-card-title{font-size:12px;font-weight:700;color:var(--bleu);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 .cot-synth-chart{height:130px;position:relative;}
+@media (max-width:380px){
+  #athleteTable td, #athleteTable th { padding-left:5px !important; padding-right:5px !important; font-size:12px; }
+  #athleteTable td.perf-cell { font-size:11px; overflow-wrap:anywhere; word-break:break-word; }
+  .kpi-value.kpi-date { font-size:15px !important; }
+  #athleteTable th { font-size:9.5px !important; letter-spacing:0 !important; }
+}
 </style>
 </head>
 <body>
@@ -1004,6 +1041,7 @@ select, input{ color-scheme: light; }
             ⭐ Meilleure perf. personnelle &nbsp;·&nbsp; 🏆 Record catégorie &nbsp;·&nbsp; 👑 Record absolu
           </span>
         </div>
+        <div class="swipe-hint">↔ Faites glisser le tableau pour voir toutes les colonnes</div>
         <div class="table-wrap">
           <table id="explorerTable">
             <colgroup>
@@ -1077,14 +1115,14 @@ select, input{ color-scheme: light; }
           <div class="panel-title">Choisir un athlète</div>
           <input type="text" id="athleteSearch" placeholder="Rechercher un athlète..." style="width:100%; background:#F4F8FA; border:1px solid var(--line-strong); color:var(--chalk); padding:9px 10px; border-radius:7px; font-size:13px; margin-bottom:10px;">
           <div class="table-wrap" style="max-height:460px;">
-            <table>
+            <table id="athleteListTable">
               <thead><tr><th>Athlète</th><th>Résultats</th><th>Né·e</th><th>Catégorie</th></tr></thead>
               <tbody id="athleteList"></tbody>
             </table>
           </div>
         </div>
 
-        <div class="panel" style="margin-bottom:0; overflow-y:auto; max-height:80vh;">
+        <div class="panel" id="athleteCardPanel" style="margin-bottom:0; overflow-y:auto; max-height:80vh;">
           <div class="panel-title" id="athleteCardTitle">Sélectionnez un athlète</div>
           <div id="athleteCardBody">
             <div class="empty-state">

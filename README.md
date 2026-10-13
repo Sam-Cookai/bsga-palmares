@@ -1,6 +1,6 @@
 # BSGA Palmarès
 
-**Version 0.49** — voir [CHANGELOG.md](./CHANGELOG.md) pour le détail des évolutions entre versions.
+**Version 0.50** — voir [CHANGELOG.md](./CHANGELOG.md) pour le détail des évolutions entre versions.
 
 Application autonome (HTML/JS) pour consulter, filtrer, visualiser, importer et
 exporter les résultats d'athlétisme du club BSGA (Bussy Saint-Georges Athlétisme), saison 2026 et suivantes.
